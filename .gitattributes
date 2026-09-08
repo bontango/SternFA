@@ -8,9 +8,14 @@
 #
 # `* -text` waere hier zu wenig: das haelt nur GIT davon ab, Zeilenenden zu aendern,
 # es haelt kein Werkzeug davon ab, beim Speichern umzuschalten. Mit `text=auto eol=lf`
-# normalisiert git beim Einchecken; die Arbeitskopie darf weiter CRLF sein, im
-# Repository kommt LF an, und `git status` bleibt sauber. Quartus und PowerShell
-# kommen mit beidem zurecht.
+# normalisiert git beim Einchecken UND checkt mit LF aus. Ein Werkzeug darf danach
+# weiter CRLF schreiben - beim naechsten Commit kommt trotzdem LF im Repository an,
+# und `git status` bleibt sauber.
+#
+# Praktische Folge: eine Datei, die git anfasst (checkout, reset, merge), liegt danach
+# mit LF in der Arbeitskopie, eine unberuehrte behaelt ihr CRLF. Der Baum ist also eine
+# Weile gemischt, bis alles einmal durch git gelaufen ist. Das ist kein Problem -
+# Quartus und PowerShell lesen beides.
 #
 # scripts/gen_qsf.ps1 schreibt die erzeugten .qsf bewusst mit CRLF - git normalisiert
 # sie beim Commit auf LF. Das ist konsistent und beabsichtigt.

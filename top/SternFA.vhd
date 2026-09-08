@@ -330,8 +330,10 @@ opt_zc_emulation <= game_option(1);
 opt_fram <= game_option(2);
 opt_force_Bally <= not game_option(3);
 opt_anti_flicker <= game_option(4);
---<= game_option(5);
-opt_nvram_init <= game_option(6); 
+-- game_option(5) has no signal of its own: on PCB v2.00 it is the FA-Control
+-- permission and is read directly at the ctrl_allow port of the FAC instance at the
+-- end of this file. On the older boards it is unused, as the manuals up to v1.04 say.
+opt_nvram_init <= game_option(6);
 
 -- determine type of CPU all games <=63 are MPU-200 games, except we have the 'Bally force' option
 --is_MPU200 <= ( not game_select(5) or not game_select(6) ) and not opt_force_Bally; 

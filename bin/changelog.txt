@@ -1,3 +1,15 @@
 --	V x.02 with adapted boot_message
 --	V x.03 corrections: inverted sound output (74HCT240) & internal signals, cpu clock adjusted to 833KHz
 --	V x.04 added CRC check, clock speed 446KHz/892KHz, MPU200 games now in range 0..63
+--
+-- Everything below this line is written by scripts\release.ps1. The leading digit of
+-- the version is the BOARD (1 = HW 1.0, 3 = HW 1.1 Cyclone IV, 4 = HW 1.1 Cyclone 10,
+-- 5 = HW 2.0), the two sub digits are the software version from
+-- rtl\common\version_pkg.vhd and move for all boards at once.
+
+2026-09-08 15:58  version .0.5
+  SW .0.5 - CPU-Takt jetzt auf ALLEN Boards 446/893 kHz. rtl\cyclone_IV\cpu_clock_gen.vhd teilte bis .0.4 haendisch 100/60 (500/833 kHz) statt 112/56; der Changelog zu x.04 nennt seit jeher 446/892 kHz, und 3,579545 MHz (Original-Stern-Quarz) / 8 bzw. / 4 ergibt 447/895 kHz - die Cyclone-10-Werte waren die richtigen, der Cyclone-IV-PLL war schlicht nie neu erzeugt worden. BETROFFEN SIND hw1_0_cyclone_IV, hw1_1_cyclone_IV UND hw2_0_dev_open; hw1_1_cyclone_10 aendert sich nicht und ist die Referenz, wie sich die anderen jetzt verhalten muessen. Beim ersten Test auf Spielgeschwindigkeit, Sound-Timing und Display-Multiplex achten - faellt etwas auf, zurueck auf SternFA_304.jic bzw. SternFA_103.jic. Ausserdem: R5101.vhd zwischen den beiden Chipfamilien vereinheitlicht (NEW_DATA_WITH_NBE_READ -> NEW_DATA_NO_NBE_READ; ohne Wirkung, width_byteena=1 und kein byteena-Port, Zahlen unveraendert), damit sich die vier Megafunction-Wrapper jetzt in nichts ausser dem Family-String unterscheiden. ERSTES RELEASE AUS DEM GEMEINSAMEN SOURCEBAUM (Umbau 08.09.2026) und ERSTES RELEASE UEBERHAUPT FUER HW 2.0 - SternFA_505.jic ist ein Prototyp-Bitstream, das Board ist nie gelaufen und FA-Control ist nie an einer Maschine gewesen. KEINE der vier Varianten ist an Hardware getestet.
+  hw1_0_cyclone_IV     1.0.5    SternFA_105.jic  sha256:866FD8AB3FF3F034
+  hw1_1_cyclone_10     4.0.5    SternFA_405.jic  sha256:10F4D41DD3CEE834
+  hw1_1_cyclone_IV     3.0.5    SternFA_305.jic  sha256:C6C457F4412DCBF7
+  hw2_0_dev_open       5.0.5    SternFA_505.jic  sha256:3359C038ADE97E95

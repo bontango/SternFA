@@ -11,13 +11,18 @@ the original Stern SB-300 or J5 sound board.
 
 Ralf Thelen ('bontango') · <https://lisy.dev> · <https://lisy.dev/swrep/SternFA>
 
-> **State of this tree, 08.09.2026.** The four board variants were just merged into one
-> source tree — one top level instead of four copies. The change is backed by the
-> synthesis numbers (see *Building* below): three of the four variants come out of the
-> rebuild byte for byte identical to what they were before. **It has not been on a
-> machine since.** The binaries under `bin/` are the ones that were in the field before
-> the rebuild and are unaffected; anything built from this tree is new and unverified.
-> `docs/WORKFLOW.md` says how to work in here.
+> **State of this tree, 08.09.2026 — read this before flashing anything.**
+>
+> Two things happened on the same day. The four board variants were merged into one
+> source tree (one top level instead of four copies), which is backed by the synthesis
+> numbers: three of the four variants came out of that rebuild byte for byte identical.
+> And `.0.5` **changes the CPU clock** on three of the four boards — see *The CPU clock*
+> below. That second one is a real behavioural change to boards that are in the field.
+>
+> **Nothing from this tree has been on a machine.** The `.0.4` binaries under `bin/`
+> predate the rebuild and are the last ones actually verified in hardware:
+> `SternFA_103.jic`, `SternFA_304.jic`, `SternFA_404c.jic`. If a `.0.5` build misbehaves,
+> those are what to go back to. `docs/WORKFLOW.md` says how to work in here.
 
 ---
 
@@ -29,10 +34,10 @@ three constants, and which folder the memory and PLL megafunctions come out of.
 
 | Variant | PCB | FPGA board | Device | Version | Status |
 |---|---|---|---|---|---|
-| `hw1_0_cyclone_IV` | SternFA v1.00 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 1.0.4 | in the field; the x.04 feature level has not been on this board yet |
-| `hw1_1_cyclone_IV` | SternFA v1.10 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 3.0.4 | in the field |
-| `hw1_1_cyclone_10` | SternFA v1.10 | Cyclone 10 piggy-back | 10CL006YE144C8G | 4.0.4 | lead variant, in the field |
-| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.4 | **prototype, never released** — see chapter 4 |
+| `hw1_0_cyclone_IV` | SternFA v1.00 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 1.0.5 | last release actually on this board: 1.0.3 |
+| `hw1_1_cyclone_IV` | SternFA v1.10 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 3.0.5 | last release actually on this board: 3.0.4 |
+| `hw1_1_cyclone_10` | SternFA v1.10 | Cyclone 10 piggy-back | 10CL006YE144C8G | 4.0.5 | lead variant; last release actually on this board: 4.0.4c |
+| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.5 | **prototype, never on a machine** — see chapter 4 |
 
 ### Version numbering
 
@@ -97,16 +102,16 @@ Current figures (Quartus 22.1std.2, all timing met, TNS 0.000):
 
 | Variant | Comb | Registers | Memory bits | LE (fitter) | Pins | Virtual | Setup slack |
 |---|---|---|---|---|---|---|---|
-| `hw1_0_cyclone_IV` | 2760 | 1195 | 69,406 (25 %) | 2976 / 6272 (47 %) | 88 / 92 | 3 | +5.77 ns |
-| `hw1_1_cyclone_IV` | 2749 | 1195 | 69,406 (25 %) | 2970 / 6272 (47 %) | 85 / 92 | 6 | +6.42 ns |
-| `hw1_1_cyclone_10` | 2755 | 1195 | 69,406 (25 %) | 2977 / 6272 (47 %) | 85 / 89 | 6 | +6.09 ns |
-| `hw2_0_dev_open` | 4666 | **1709** | 69,406 (25 %) | 4934 / 6272 (79 %) | 86 / 92 | 5 | +4.82 ns |
+| `hw1_0_cyclone_IV` | 2764 | 1195 | 69,406 (25 %) | 2983 / 6272 (48 %) | 88 / 92 | 3 | +5.99 ns |
+| `hw1_1_cyclone_IV` | 2752 | 1195 | 69,406 (25 %) | 2966 / 6272 (47 %) | 85 / 92 | 6 | +5.73 ns |
+| `hw1_1_cyclone_10` | 2761 | 1195 | 69,406 (25 %) | 2973 / 6272 (47 %) | 85 / 89 | 6 | +6.54 ns |
+| `hw2_0_dev_open` | 4668 | **1709** | 69,406 (25 %) | 4943 / 6272 (79 %) | 86 / 92 | 5 | +5.06 ns |
 
 **Comb / Registers / Memory bits are the acceptance criterion**, not the fitter's LE
 number — a single extra `VIRTUAL_PIN` moves the latter without anything having changed.
 `scripts/baseline.csv` holds these numbers together with the reason for each of them.
 
-The 1917 extra combinational functions and 514 extra registers on `hw2_0_dev_open` are
+The 1916 extra combinational functions and 514 extra registers on `hw2_0_dev_open` are
 FA-Control. That is also why the vector widths in the top level are cut to the machine
 (60 lamps, 19 solenoids, 40 switches) instead of being chosen generously.
 
@@ -115,7 +120,8 @@ Game ROMs and the SD card image are not part of this tree.
 ## FA-Control on hardware 2.0
 
 **Fully integrated in the source, builds and fits with room to spare — but it has never
-run on a real machine, and no binary has been released for it.**
+run on a real machine.** `bin/hardware v2.0/dev_open/SternFA_505.jic` is the first
+bitstream for this board at all, and it has not been flashed.
 
 `rtl/fa_control/` is a LISY slave for an *ESP32-C3 Super Mini* in socket X7. The module
 runs [FA-Control](https://github.com/bontango/FA_Control) and serves a test interface in
@@ -168,38 +174,49 @@ a dead bus.
 ### What is still open
 
 - **Never run on a machine.** When you try it, check in this order: does the web
-  interface connect and report `SternFA / 5.0.4` with 60/19/40/5 — do the displays show
+  interface connect and report `SternFA / 5.0.5` with 60/19/40/5 — do the displays show
   what you type — does a single lamp light the lamp you asked for — does a coil pulse
   the right coil. A lamp or coil off by a group is a mapping detail, fixable in one
   place.
 - **Digit order** — the `fa_disp_map` process at the end of `top/SternFA.vhd` is marked
   `HW-TUNABLE`; if the display comes out reversed on the prototype, that block is where
   to fix it.
-- **No released binary.** `bin/hardware v2.0/dev_open/` is still empty.
+- **The first binary exists but is untested.** `SternFA_505.jic` (08.09.2026) is the
+  first bitstream for HW 2.0 at all. Treat the first takeover as an experiment, on the
+  bench, with a machine you can afford to switch off.
 - **A board with both `HAS_DISP_LA_STR` and `HAS_ESP32`** would take control of lamps,
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
 Chapter 9 of `docs/SternFA_user_manual_v2.04.md` describes all of this for the operator.
 
-## Known issues
+## The CPU clock, and why .0.5 exists
 
-Two megafunction wrappers diverge between the two FPGA families in a way that is *not*
-just the family string, and both are real:
+Until `.0.5` the two FPGA families ran the design at different speeds, and nobody
+noticed because the difference sat inside a generated megafunction wrapper:
 
-| File | Cyclone IV | Cyclone 10 |
+| | `clk_500KHz` (MPU-100 / Bally) | `clk_1MHz` (MPU-200) |
 |---|---|---|
-| `cpu_clock_gen.vhd` | ÷100 / ÷60 = **500 / 833 kHz** | ÷112 / ÷56 = **446 / 893 kHz** |
-| `R5101.vhd` | `NEW_DATA_WITH_NBE_READ` | `NEW_DATA_NO_NBE_READ` |
+| `rtl/cyclone_10/cpu_clock_gen.vhd` | ÷112 = 446.4 kHz | ÷56 = 892.9 kHz |
+| `rtl/cyclone_IV/cpu_clock_gen.vhd` up to `.0.4` | ÷100 = 500 kHz | ÷60 = 833.3 kHz |
 
-The x.04 changelog line says "clock speed 446/892 kHz", and 3.579545 MHz ÷ 8 and ÷ 4 —
-the original Stern crystal — give 447 / 895 kHz. The Cyclone 10 values are the correct
-ones; the Cyclone IV PLL was simply never regenerated, so `1.0.4`, `3.0.4` and `5.0.4`
-run at 500 / 833 kHz although their changelog claims otherwise. Fixing that changes the
-behaviour of boards in the field and is therefore its own release, not a silent repair.
+The x.04 changelog says "clock speed 446/892 kHz", and 3.579545 MHz — the original Stern
+crystal — divided by 8 and by 4 gives 447 / 895 kHz. So the Cyclone 10 values are the
+correct ones; the Cyclone IV PLL was simply never regenerated when x.04 was made.
+`1.0.4`, `3.0.4` and `5.0.4` therefore ran 12 % slow on the MPU-200 clock and 12 % fast
+on the MPU-100 one, against what their own changelog claimed.
 
-The `R5101` difference has no effect here (`width_byteena = 1` and no `byteena` port, so
-the two modes are equivalent) but it should still be unified.
+**`.0.5` regenerates it.** Since `rtl/cyclone_IV/` is shared by three of the four
+variants, `hw1_0_cyclone_IV`, `hw1_1_cyclone_IV` and `hw2_0_dev_open` all change speed
+with this release; `hw1_1_cyclone_10` is unaffected and is the reference for what the
+others should now sound like. **Watch game speed, sound timing and the display multiplex
+on the first machine.**
+
+The same release unifies `R5101.vhd` between the two families
+(`NEW_DATA_WITH_NBE_READ` → `NEW_DATA_NO_NBE_READ`). That one has no effect —
+`width_byteena = 1` and there is no `byteena` port, so the two modes are equivalent, and
+the synthesis numbers do not move. The four megafunction wrappers now differ between
+`rtl/cyclone_IV/` and `rtl/cyclone_10/` in nothing but the device family string.
 
 ## Repository
 
