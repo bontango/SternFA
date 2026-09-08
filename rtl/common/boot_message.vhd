@@ -6,13 +6,9 @@
 -- 500KHz input clock
 -- v1.1 init integer digit to 1
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-
-package instruction_buffer_type is
-	type DISPLAY_T is array (0 to 6) of std_logic_vector(3 downto 0);
-end package instruction_buffer_type;
-
+-- DISPLAY_T used to be declared right here, in front of the entity. It now lives in
+-- rtl/common/display_pkg.vhd - fa_io_bally.vhd needs it too, and a package that other
+-- modules use belongs in its own file, first in the file list.
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 

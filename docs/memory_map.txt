@@ -1,0 +1,58 @@
+static MEMORY_READ_START(by35_readmem)
+  { 0x0000, 0x007f, MRA_RAM }, /* U7 128 Byte Ram*/
+  { 0x0088, 0x008b, pia_r(BY35_PIA0) }, /* U10 PIA: Switches + Display + Lamps*/
+  { 0x0090, 0x0093, pia_r(BY35_PIA1) }, /* U11 PIA: Solenoids/Sounds + Display Strobe */
+  { 0x0200, 0x02ff, MRA_RAM }, /* CMOS Battery Backed*/
+  { 0x1000, 0xffff, MRA_ROM },
+MEMORY_END
+
+static MEMORY_WRITE_START(by35_writemem)
+  { 0x0000, 0x007f, MWA_RAM }, /* U7 128 Byte Ram*/
+  { 0x0088, 0x008b, pia_w(BY35_PIA0) }, /* U10 PIA: Switches + Display + Lamps*/
+  { 0x0090, 0x0093, pia_w(BY35_PIA1) }, /* U11 PIA: Solenoids/Sounds + Display Strobe */
+  { 0x0200, 0x02ff, by35_CMOS_w, &by35_CMOS }, /* CMOS Battery Backed*/
+  { 0x1000, 0xffff, MWA_NOP },
+MEMORY_END
+
+static MEMORY_READ_START(sam_readmem)
+  { 0x0000, 0x007f, MRA_RAM },
+  { 0x0088, 0x008b, pia_0_r },
+  { 0x0090, 0x0093, pia_1_r },
+  { 0x0200, 0x02ff, MRA_RAM },
+  { 0x1000, 0x1fff, MRA_ROM },
+  { 0x2000, 0x207f, MRA_RAM }, new 
+  { 0x2104, 0x2107, pia_2_r },
+  { 0x2108, 0x210b, pia_3_r },
+  { 0x2110, 0x2113, pia_4_r },
+  { 0x2120, 0x2123, pia_5_r },
+  { 0x2140, 0x2143, pia_6_r },
+  { 0x2800, 0xffff, MRA_ROM },
+MEMORY_END
+
+static MEMORY_WRITE_START(sam_writemem)
+  { 0x0000, 0x007f, MWA_RAM },
+  { 0x0088, 0x008b, pia_0_w },
+  { 0x0090, 0x0093, pia_1_w },
+  { 0x0200, 0x02ff, by35_CMOS_w, &by35_CMOS },
+  { 0x1000, 0x1fff, MWA_NOP },
+  { 0x2000, 0x207f, MWA_RAM },
+  { 0x2104, 0x2107, pia_2_w },
+  { 0x2108, 0x210b, pia_3_w },
+  { 0x2110, 0x2113, pia_4_w },
+  { 0x2120, 0x2123, pia_5_w },
+  { 0x2140, 0x2143, pia_6_w },
+  { 0x2800, 0xffff, MWA_NOP },
+MEMORY_END
+
+  if ((sb & 0xff00) == SNDBRD_ST300 || sb == SNDBRD_ASTRO) {
+    install_mem_write_handler(0,0x00a0, 0x00a7, snd300_w);  // ok
+    install_mem_read_handler (0,0x00a0, 0x00a7, snd300_r);  // ok
+    install_mem_write_handler(0,0x00c0, 0x00c0, snd300_wex);// ok
+  } else if (sb == SNDBRD_ST100) {
+    install_mem_write_handler(0,0x00a0, 0x00a0, stern100_snd_w); // sounds on (DIP 23 = 1)
+    install_mem_write_handler(0,0x00c0, 0x00c0, stern100_chm_w); // chimes on (DIP 23 = 0)
+  } else if (sb == SNDBRD_ST100B) {
+    install_mem_write_handler(0,0x00a0, 0x00a0, stern100_snd_w);
+  } else if (sb == SNDBRD_GRAND) {
+    install_mem_write_handler(0,0x0080, 0x0080, sndbrd_0_data_w);
+  }
