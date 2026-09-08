@@ -11,6 +11,14 @@ the original Stern SB-300 or J5 sound board.
 
 Ralf Thelen ('bontango') · <https://lisy.dev> · <https://lisy.dev/swrep/SternFA>
 
+> **State of this tree, 08.09.2026.** The four board variants were just merged into one
+> source tree — one top level instead of four copies. The change is backed by the
+> synthesis numbers (see *Building* below): three of the four variants come out of the
+> rebuild byte for byte identical to what they were before. **It has not been on a
+> machine since.** The binaries under `bin/` are the ones that were in the field before
+> the rebuild and are unaffected; anything built from this tree is new and unverified.
+> `docs/WORKFLOW.md` says how to work in here.
+
 ---
 
 ## Boards
