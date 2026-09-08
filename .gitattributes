@@ -1,0 +1,33 @@
+# Zeilenenden: im Repository ausnahmslos LF.
+#
+# Der Baum kam gemischt hier an: alles CRLF, ausser den fuenf aus AtariFA
+# uebernommenen Dateien unter lib_fa_control/ (heute rtl/fa_control/), die LF haben.
+# Ohne Normalisierung sieht jeder spaetere Variantendiff nach Totalumbau aus, sobald
+# ein Editor eine Datei von LF auf CRLF kippt - und genau das passiert auf Windows
+# staendig.
+#
+# `* -text` waere hier zu wenig: das haelt nur GIT davon ab, Zeilenenden zu aendern,
+# es haelt kein Werkzeug davon ab, beim Speichern umzuschalten. Mit `text=auto eol=lf`
+# normalisiert git beim Einchecken; die Arbeitskopie darf weiter CRLF sein, im
+# Repository kommt LF an, und `git status` bleibt sauber. Quartus und PowerShell
+# kommen mit beidem zurecht.
+#
+# scripts/gen_qsf.ps1 schreibt die erzeugten .qsf bewusst mit CRLF - git normalisiert
+# sie beim Commit auf LF. Das ist konsistent und beabsichtigt.
+* text=auto eol=lf
+
+# Binaerdateien: nie diffen, nie konvertieren.
+*.sof binary
+*.jic binary
+*.pof binary
+*.rbf binary
+*.rpd binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.xls binary
+*.xlsx binary
+*.docx binary
+*.img binary
+*.zip binary

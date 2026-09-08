@@ -1,0 +1,3 @@
+--	V x.02 with adapted boot_message
+--	V x.03 corrections: inverted sound output (74HCT240) & internal signals, cpu clock adjusted to 833KHz
+--	V x.04 added CRC check, clock speed 446KHz/892KHz, MPU200 games now in range 0..63

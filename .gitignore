@@ -1,0 +1,61 @@
+# Quartus build artifacts. After the rebuild they sit inside variants/<name>/,
+# one set per variant, because that is the Quartus project directory.
+db/
+incremental_db/
+output_files/
+atom_netlists/
+simulation/
+.qsys_edit/
+
+# Backup files
+*.bak
+*.qws
+
+# Quartus generated reports / logs
+*.rpt
+*.summary
+*.smsg
+*.pin
+*.jdi
+*.sld
+*.done
+*.qdf
+*.sopcinfo
+
+# Quartus internal
+c5_pin_model_dump.txt
+PLLJ_PLLSPE_INFO.txt
+greybox_tmp/
+
+# Build/verification logs
+*.log
+
+# Historic modules and BallyFA ancestors. They are kept on the workstation but are
+# deliberately NOT published: nothing in there is in any build, several files are
+# older copies of modules that still exist under rtl/, and a reader of the repo
+# would have to guess which is which. See README.md.
+archive/
+
+# Internal working notes - they stay on the workstation, not in the public repo.
+# CLAUDE.md is the context file for the assistant, PLAN_Zielstruktur.md documents why
+# the source tree looks the way it does, VARIANTEN.md tracks which board variant has
+# actually been on hardware. How to work in this tree is public: docs/WORKFLOW.md.
+CLAUDE.md
+PLAN_Zielstruktur.md
+VARIANTEN.md
+
+# Windows junk
+Thumbs.db
+desktop.ini
+
+# Office lock/temp files (e.g. ~$SternFA_Lamps.xlsx while open in Excel)
+~$*
+
+# NOTE: rtl/cyclone_10/*.cmp, rtl/cyclone_IV/*.cmp and the two cpu_clock_gen.ppf are
+#       tracked. They belong to the megafunctions (the .qip lists them as MISC_FILE),
+#       so a fresh clone needs them - they are not build artefacts.
+# NOTE: bin/**/*.jic are tracked on purpose. They are the released artefacts, one per
+#       board and version, and release.ps1 records their SHA-256 in bin/changelog.txt.
+# NOTE: the .cof of each variant is tracked and hand maintained - it is the only file
+#       Quartus likes to rewrite with absolute paths. It lives next to the .qpf, not
+#       in output_files/, which is ignored above.
