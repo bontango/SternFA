@@ -18,7 +18,7 @@
 	#create_generated_clock -name clk_out -divide_by 100 -source clk_50 cpu_clk_gen:clock_gen|clk_out	
 	#create_generated_clock -name clk_out_1 -divide_by 125 -source clk_50 cpu_400KHz_gen:clock_gen_1|clk_out_1	
 	#create_generated_clock -name clk_out_2 -divide_by 100 -source clk_50 cpu_500KHz_gen:clock_gen_2|clk_out_2	
-	create_generated_clock -name pia_U11_ca2_o -divide_by 1000 -source clk_50 pia6821:U11|ca2_out
+	create_generated_clock -name pia_U11_ca2_o -divide_by 100 -source clk_50 pia6821:U11|ca2_out
 
 	#create_clock -name {cpu_clk} -period 1118.880 -waveform { 0.000 559.440 } [get_registers {cpu_clk}]
     #  Now that we have created the custom clocks which will be base clocks,

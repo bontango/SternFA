@@ -155,6 +155,8 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to reset_sw
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to OPT_DIPS
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to GS_DIPS
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to SW_Selftest
+set_global_assignment -name VHDL_FILE ../lib_common/crc16_ccitt.vhd
+set_global_assignment -name SDC_FILE Stern.sdc
 set_global_assignment -name VHDL_FILE Stern.vhd
 set_global_assignment -name VHDL_FILE ../lib_common/pia6821.vhd
 set_global_assignment -name VHDL_FILE ../lib_common/read_the_dips.vhd
