@@ -54,6 +54,7 @@ v1.0 19.08.2026
   - [9.4. Was die Weboberfläche von der Platine erfährt](#94-was-die-weboberfläche-von-der-platine-erfährt)
   - [9.5. Anschluss](#95-anschluss)
   - [9.6. Der ESP32-Taster S8 und die DIP-Bank S9](#96-der-esp32-taster-s8-und-die-dip-bank-s9)
+  - [9.7. Spiel-ROM von FA-Control statt von der SD-Karte](#97-spiel-rom-von-fa-control-statt-von-der-sd-karte)
 - [10. Das FPGA programmieren](#10-das-fpga-programmieren)
 - [11. Platinenvarianten](#11-platinenvarianten)
 - [12. Was an Hardware 2.0 neu ist](#12-was-an-hardware-20-neu-ist)
@@ -269,6 +270,11 @@ haben.
 
 ### 5.3. Phase 2: SD-Karte lesen
 
+**Nur Hardware 2.0:** Vorher fragt SternFA das ESP32-Modul, ob dort ein ROM für das gewählte Spiel
+liegt (Kapitel 9.7). Wenn ja, wird die SD-Karte gar nicht gelesen, und die Statusanzeige zeigt
+`3`. Ohne Modul, ohne ROM dort oder ohne Antwort geht es wie unten beschrieben weiter; ohne
+gestecktes Modul dauert der Start dabei bis zu 3 Sekunden länger.
+
 SternFA liest das ROM des gewählten Spiels von der SD-Karte. Schlägt das fehl, blinkt die **rote
 LED „SD-Kartenfehler"** zunächst einen Code und leuchtet danach dauerhaft, und in der
 Statusanzeige erscheint eine Fehlerziffer:
@@ -277,6 +283,7 @@ Statusanzeige erscheint eine Fehlerziffer:
 |---|---|
 | `1` | allgemeines Problem mit der SD-Karte — es konnten keine Daten gelesen werden. Karte fehlt, ist nicht roh beschrieben oder nicht lesbar |
 | `2` | CRC-Fehler: Daten wurden gelesen, aber die Prüfsumme des Spielblocks passt nicht. Das Image ist beschädigt, oder die Karte ist unzuverlässig |
+| `3` | kein Fehler: das ROM kam vom ESP32-Modul (nur Hardware 2.0, Kapitel 9.7) |
 
 Gelingt das Lesen, bleibt die rote LED dunkel und es erscheint keine Fehlerziffer.
 
@@ -373,10 +380,13 @@ Ein Testgerät soll nicht ungefragt in ein laufendes Spiel eingreifen können. D
 1. Das ESP32-Modul fragt aktiv an („ich möchte übernehmen").
 2. **Options-DIP 5 steht auf ON.**
 
-Steht Option 5 auf OFF, meldet die Weboberfläche im Klartext *„Kontrolle verweigert —
-Options-DIP 5 auf ON stellen"*, und das Spiel läuft ungestört weiter. Lesen darf das Modul
-trotzdem: Schalterzustände lassen sich also auch bei laufendem Spiel mitverfolgen, ohne etwas
-freizugeben.
+Steht Option 5 auf OFF, verweigert die Weboberfläche die Übernahme, und das Spiel läuft
+ungestört weiter. Lesen darf das Modul trotzdem: Schalterzustände lassen sich also auch bei
+laufendem Spiel mitverfolgen, ohne etwas freizugeben.
+
+> **Achtung, die Meldung nennt die falsche Nummer.** FA-Control schreibt in diesem Fall
+> *„DIP 4"*. Der Text stammt aus AtariFA, wo die Freigabe tatsächlich auf Options-DIP 4
+> liegt, und sitzt in der ESP32-Firmware. **Bei SternFA ist es Options-DIP 5.**
 
 ### 9.2. Was während der Übernahme passiert
 
@@ -460,6 +470,46 @@ sie es, und sie haben keine Wirkung, wenn der Steckplatz leer ist.
 Die genaue Bedeutung kann sich mit der FA-Control-Firmwareversion ändern — maßgeblich ist die
 Anleitung von FA-Control, nicht diese hier.
 
+### 9.7. Spiel-ROM von FA-Control statt von der SD-Karte
+
+Ab Software 5.0.6 kann das ESP32-Modul Spiel-ROMs vorhalten. SternFA startet dann **ohne
+SD-Karte**. Verwaltet werden sie im Menü **08 GAME ROMS** der Weboberfläche (FA-Control ab
+1.21):
+
+- **Hochladen:** Gerät `SternFA`, die Spielnummer (dieselbe wie auf den Spielauswahl-DIPs und
+  im Bootbild) und das Spielabbild, das auch auf die SD-Karte geht: genau 65 536 Byte je
+  Spiel, mit der Prüfsumme am Ende. Ein Abbild mit falscher Prüfsumme wird abgewiesen.
+- **Von lisy.dev laden:** Die Abbilder liegen dort unter `swrep/misc/FA_Control/roms/SternFA/`
+  und heißen `nnn.bin` oder `nnn_Titel.bin`, nnn = Spielnummer dreistellig, z. B.
+  `012_Stars.bin`. Auf dem Modul liegt das Spiel dann als `SternFA/012`.
+
+Beim Einschalten läuft es so ab:
+
+1. SternFA liest die DIP-Schalter (Phase 1).
+2. Direkt danach fragt SternFA das Modul nach dem gewählten Spiel und wiederholt die Frage bis zu
+   3 Sekunden lang.
+3. Liegt das ROM dort, wird es übertragen (unter einer Sekunde) und geprüft. Die Statusanzeige
+   zeigt `3`, die SD-Karte wird nicht angefasst.
+4. Liegt es dort nicht, antwortet das Modul sofort mit „nein“, und SternFA liest die SD-Karte wie
+   gewohnt. Dasselbe passiert, wenn keine Antwort kommt oder die Übertragung fehlerhaft war.
+
+Worauf zu achten ist:
+
+- **Das Modul muss beim Einschalten wach sein** (S9-DIP1 auf ON). Im Tiefschlaf antwortet es
+  nicht, und SternFA nimmt nach 3 Sekunden die SD-Karte.
+- **Options-DIP 5 spielt hier keine Rolle.** Er gibt nur die Übernahme frei (9.1). Die
+  Spielauswahl über das Modul funktioniert auch ohne ihn.
+- **Das nvram bleibt im FRAM der Platine**, genau wie beim Start von SD-Karte. Credits und
+  Highscores hängen an der Spielnummer, nicht an der Quelle des ROMs.
+- **Das Modul braucht dafür einen eigenen Speicherbereich**, den nur eine Vollinstallation von
+  FA-Control per USB einrichtet. Fehlt er, gibt es keine Kachel 08, und das Modul antwortet
+  sofort mit „nein“. Etwa 60 Spiele passen hinein.
+- Welche Anfrage zuletzt kam und was das Modul geantwortet hat, zeigt Menü 08 oben unter
+  *LAST BOOT REQUEST* — dort lässt sich ein fehlendes ROM auch direkt von lisy.dev holen.
+- **Die Weboberfläche erfährt seit 5.0.6 die volle Spielnummer.** Vorher meldete SternFA nur
+  die Einerstelle; Namensdateien für Spiel 5, 15 und 105 fielen dadurch zusammen. Jetzt heißen
+  sie wie die ROMs: `SternFA/012.cfg`.
+
 ## 10. Das FPGA programmieren
 
 Alles, was Sie brauchen, um die Software auf die Platine zu bekommen, steht auf meiner Website
@@ -512,6 +562,8 @@ Wer die älteren Platinen kennt, für den ist das die Kurzfassung:
   Modul übergeben. Das ist es, was Kapitel 9 möglich macht — und was Kapitel 4.3 von einer
   Konvention zu einer physikalischen Tatsache macht.
 - **Options-DIP 5 hat jetzt eine Funktion** (FA-Control-Freigabe). Vorher war er unbenutzt.
+- **Spiel-ROMs können vom ESP32 kommen** (ab 5.0.6, Kapitel 9.7). Die SD-Karte ist dann
+  nicht mehr nötig.
 - **Der unbenutzte SB_IRQ-Eingang** ist weiterhin auf der Platine geführt, wird aber wie bisher
   nicht ausgewertet.
 
@@ -529,6 +581,9 @@ und 6.
   um eine Gruppe verschoben, ist das eine Frage der Zuordnung und an genau einer Stelle zu
   beheben; melden Sie in dem Fall, was Sie gesehen haben.
 - **Ton lässt sich über FA-Control nicht ansteuern** — siehe 9.4.
+- **Das Laden des Spiel-ROMs vom ESP32 ist noch nicht an Hardware erprobt** (neu in 5.0.6).
+  Kommt statt der `3` in der Statusanzeige keine Ziffer, wurde doch die SD-Karte gelesen; im
+  Menü 08 steht dann, was das Modul zuletzt geantwortet hat.
 - **Der Options-DIP ist während einer Übernahme kein Not-Aus** — siehe 9.3.
 - **SW3 auf der FPGA-Platine tut nichts.** Der Taster liegt am FPGA und ist reserviert; bislang
   hat ihn keine Softwareversion benutzt. Der Selbsttest liegt auf S6 „Bally Test" und auf dem
@@ -825,7 +880,7 @@ Credit              4   zählt 4, 3, 2, 1, 0 herunter
 FA-Control-Übernahme)
 
 **SD-Fehlerziffer in der Statusanzeige:** `1` = Karte nicht lesbar · `2` = Prüfsumme des
-Spielblocks falsch
+Spielblocks falsch · `3` = ROM kam vom ESP32 (kein Fehler, nur HW 2.0)
 
 **Taster:** SW2 Reset (FPGA-Platine) · S6 „Bally Test" = Selbsttest · S33 Bookkeeping-Reset ·
 S8 gehört zum ESP32 · SW3 ohne Funktion

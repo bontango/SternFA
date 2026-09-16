@@ -55,6 +55,7 @@ v1.0 19.08.2026
   - [9.4. What the web interface learns from the board](#94-what-the-web-interface-learns-from-the-board)
   - [9.5. Connecting it](#95-connecting-it)
   - [9.6. The ESP32 button S8 and DIP bank S9](#96-the-esp32-button-s8-and-dip-bank-s9)
+  - [9.7. Game rom from FA-Control instead of the SD card](#97-game-rom-from-fa-control-instead-of-the-sd-card)
 - [10. Programming the FPGA](#10-programming-the-fpga)
 - [11. Board variants](#11-board-variants)
 - [12. What is new in hardware 2.0](#12-what-is-new-in-hardware-20)
@@ -266,6 +267,11 @@ in the FPGA and whether the game select switches are set to what you meant.
 
 ### 5.3. Phase 2: SD card read
 
+**Hardware 2.0 only:** first SternFA asks the ESP32 module whether it holds a rom for the selected
+game (chapter 9.7). If it does, the SD card is not read at all and the status display shows `3`.
+Without a module, without a rom there or without an answer, the boot continues as described
+below; with no module plugged in it takes up to 3 seconds longer.
+
 SternFA reads the rom of the selected game from the SD card. If this fails, the **red LED 'SD
 card error'** first blinks a code and then stays lit, and an error digit appears in the status
 display:
@@ -274,6 +280,7 @@ display:
 |---|---|
 | `1` | general problem with the SD card - no data could be read. Card missing, not written raw, or not readable |
 | `2` | CRC error: data was read, but the checksum of the game block does not match. The image is damaged, or the card is unreliable |
+| `3` | no error: the rom came from the ESP32 module (hardware 2.0 only, chapter 9.7) |
 
 If the read succeeds, the red LED stays dark and no error digit appears.
 
@@ -366,9 +373,13 @@ come together:
 1. The ESP32 module actively asks ("I would like to take over").
 2. **Option DIP 5 is ON.**
 
-With option 5 OFF, the web interface says in plain words *"control refused - set option DIP 5 to
-ON"*, and the game carries on undisturbed. Reading is still allowed: you can follow switch
-states during a running game without giving anything up.
+With option 5 OFF, the web interface refuses to take over and the game carries on undisturbed.
+Reading is still allowed: you can follow switch states during a running game without giving
+anything up.
+
+> **Careful, the message names the wrong number.** FA-Control writes *"DIP 4"* here. That text
+> comes from AtariFA, where the permission really is on option DIP 4, and it lives in the ESP32
+> firmware. **On SternFA it is option DIP 5.**
 
 ### 9.2. What happens while it has control
 
@@ -447,6 +458,46 @@ them, and they have no effect if the socket is empty.
 The exact meaning can change with the FA-Control firmware version - the FA-Control documentation
 is the reference, not this manual.
 
+### 9.7. Game rom from FA-Control instead of the SD card
+
+From software 5.0.6 on the ESP32 module can hold game roms, and SternFA then boots **without an
+SD card**. They are managed in menu **08 GAME ROMS** of the web interface (FA-Control 1.21 or
+newer):
+
+- **Upload:** device `SternFA`, the game number (the one set on the game select DIPs and shown
+  on the boot display) and the game image that also goes onto the SD card: exactly 65,536
+  bytes per game, with its checksum at the end. An image with a wrong checksum is rejected.
+- **Load from lisy.dev:** the images are in `swrep/misc/FA_Control/roms/SternFA/`, named
+  `nnn.bin` or `nnn_Title.bin`, nnn being the three-digit game number, e.g. `012_Stars.bin`. On
+  the module the game is then kept as `SternFA/012`.
+
+At power on:
+
+1. SternFA reads the DIP switches (phase 1).
+2. Right after that it asks the module for the selected game, repeating the question for up to
+   3 seconds.
+3. If the rom is there, it is transferred (less than a second) and checked. The status display
+   shows `3`, the SD card is not touched.
+4. If it is not there, the module says "no" at once and SternFA reads the SD card as usual. The
+   same happens if no answer comes or the transfer was faulty.
+
+Keep in mind:
+
+- **The module has to be awake at power on** (S9-DIP1 ON). In deep sleep it does not answer, and
+  SternFA takes the SD card after 3 seconds.
+- **Option DIP 5 plays no part here.** It only permits the takeover (9.1); loading the game
+  through the module works without it.
+- **The nvram stays in the board's FRAM**, exactly as with an SD card boot. Credits and high
+  scores belong to the game number, not to where the rom came from.
+- **The module needs a storage area of its own** for this, which only a full installation of
+  FA-Control over USB sets up. Without it there is no tile 08 and the module says "no" at
+  once. About 60 games fit.
+- Which request came last and what the module answered is shown at the top of menu 08 under
+  *LAST BOOT REQUEST* - a missing rom can be fetched from lisy.dev right there.
+- **Since 5.0.6 the web interface learns the full game number.** Before, SternFA reported the
+  units digit only, so naming files for games 5, 15 and 105 fell together. Now they are named
+  like the roms: `SternFA/012.cfg`.
+
 ## 10. Programming the FPGA
 
 Everything you need to get the software onto the board is described on my website, and it is
@@ -498,6 +549,8 @@ If you know the older boards, this is the short list:
   boot. This is what makes chapter 9 possible - and what makes chapter 4.3 a physical fact
   rather than a convention.
 - **Option DIP 5 now has a function** (FA-Control permission). It was unused before.
+- **Game roms can come from the ESP32** (from 5.0.6, chapter 9.7), so the SD card is no longer
+  required.
 - **The unused SB_IRQ input** is still routed on the board but is not evaluated, as before.
 
 Everything that mattered to the player is unchanged: same connectors, same mounting holes, same
@@ -512,6 +565,9 @@ game list, same SD card image, same options 1 to 4 and 6.
   coil is off by a group, that is a mapping detail and it is fixable in one place; report what
   you saw.
 - **Sound cannot be driven by FA-Control** - see 9.4.
+- **Loading the game rom from the ESP32 has not been tried on hardware yet** (new in 5.0.6). If
+  the status display shows no digit instead of `3`, the SD card was read after all; menu 08 then
+  shows what the module answered last.
 - **The option DIP is not an emergency stop during a takeover** - see 9.3.
 - **SW3 on the FPGA board does nothing.** It is wired to the FPGA and reserved; no software
   version has used it so far. The self test is on S6 'Bally Test' and in the coin door.
@@ -800,7 +856,7 @@ Credit              4    counts down 4, 3, 2, 1, 0
 (blinks at start, then lit while the game runs; lit continuously during an FA-Control takeover)
 
 **SD card error digit in the status display:** `1` = card not readable · `2` = checksum of the
-game block wrong
+game block wrong · `3` = rom came from the ESP32 (no error, HW 2.0 only)
 
 **Buttons:** SW2 reset (FPGA board) · S6 'Bally Test' = self test · S33 bookkeeping reset ·
 S8 belongs to the ESP32 · SW3 has no function

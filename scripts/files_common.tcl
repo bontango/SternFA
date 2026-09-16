@@ -12,7 +12,11 @@ set_global_assignment -name VHDL_FILE ../../rtl/common/display_pkg.vhd
 # Self contained folder on purpose, taken from AtariFA unchanged except fa_io_bally.vhd,
 # which is the Bally/Stern -35 pin driver and exists only here.
 #
-# These five files are in EVERY variant's list although only HW 2.0 instantiates them
+# esp_rom_loader.vhd is the one addition of SternFA's own besides fa_io_bally.vhd: the
+# game ROM from the ESP32 instead of the SD card, a boot time protocol of its own
+# outside LISY.
+#
+# These six files are in EVERY variant's list although only HW 2.0 instantiates them
 # (constant HAS_ESP32 in variants\<name>\variant_pkg.vhd). That is not sloppiness:
 # Quartus resolves entity references in the NOT taken branch of an if..generate as
 # well (Error 10481), so the sources have to be analysable everywhere. It costs
@@ -23,6 +27,7 @@ set_global_assignment -name VHDL_FILE ../../rtl/fa_control/uart_rx.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/uart_tx.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/fa_control.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/fa_io_bally.vhd
+set_global_assignment -name VHDL_FILE ../../rtl/fa_control/esp_rom_loader.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/crc16_ccitt.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/boot_message.vhd
 set_global_assignment -name VHDL_FILE ../../top/SternFA.vhd

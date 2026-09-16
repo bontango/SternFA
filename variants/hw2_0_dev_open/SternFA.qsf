@@ -153,6 +153,7 @@ set_global_assignment -name VHDL_FILE ../../rtl/fa_control/uart_rx.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/uart_tx.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/fa_control.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/fa_control/fa_io_bally.vhd
+set_global_assignment -name VHDL_FILE ../../rtl/fa_control/esp_rom_loader.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/crc16_ccitt.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/boot_message.vhd
 set_global_assignment -name VHDL_FILE ../../top/SternFA.vhd

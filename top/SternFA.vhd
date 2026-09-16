@@ -74,6 +74,13 @@ entity SternFA is
 		-- that is until the end of boot phase 1; afterwards U1 carries the ESP32's TX
 		-- and U2 its ctrl_req. The names are kept because that is what they are during
 		-- the DIP scan on every board - see the FA-Control block at the end.
+		--
+		-- NAMENSFALLE on v2.00: the schematic calls these two FPGA pins U1_SW / U2_SW,
+		-- and the nets it calls GS_Dips / Opt_Dips are the ones on the INPUT side of
+		-- U1/U2, which never reach the FPGA. Those input nets carry no pull-up of their
+		-- own on PCB v2.00 - on HW 1.x the FPGA's internal one was the only one there
+		-- was, and the muxes put it out of reach. Fitting it as a component is a board
+		-- fix, not one that can be done here; see variants/hw2_0_dev_open/pins.tcl.
 		GS_DIPS	:	in 	std_logic;
 		OPT_DIPS	:	in 	std_logic;
 
@@ -257,6 +264,7 @@ signal bally_led_count_vec	:  std_logic_vector(3 downto 0);
 signal g_dig0					:  std_logic_vector(3 downto 0);
 signal g_dig1					:  std_logic_vector(3 downto 0);
 signal g_dig2					:  std_logic_vector(3 downto 0);
+signal g_digits				:  std_logic_vector(11 downto 0);	-- the three above, for FA-Control
 signal o_dig0					:  std_logic_vector(3 downto 0);
 signal o_dig1					:  std_logic_vector(3 downto 0);
 signal b_dig0					:  std_logic_vector(3 downto 0);
@@ -324,6 +332,29 @@ signal fa_blanking	: std_logic;
 -- FA-Control mux in between it needs a name of its own.
 signal U11_PB_I3	: std_logic_vector(3 downto 2);
 
+-- ---------------------------------------------------------------------------
+-- Game ROM from the ESP32 instead of the SD card (rtl/fa_control/esp_rom_loader.vhd).
+-- HW 2.0 only, same generate as FA-Control. Right after the dip scan the loader asks
+-- the ESP for the selected game; if it gets one, the ROM is written through the same
+-- path the SD card uses and SD_Card stays in reset. If not ('N', no answer, bad CRC)
+-- esp_rom_no releases SD_Card and the boot is exactly the one without an ESP.
+-- On the other boards esp_rom_no is tied to '1' and the rest to '0'.
+-- ---------------------------------------------------------------------------
+signal sd_cpu_reset_l	: std_logic;	-- SD_Card's "ROM is in", one of two sources of boot_phase(2)
+signal esp_rom_busy	: std_logic;	-- loader owns the UART
+signal esp_rom_ok	: std_logic;	-- ROM came from the ESP
+signal esp_rom_no	: std_logic;	-- no ROM from the ESP, SD card takes over
+signal esp_rom_addr	: std_logic_vector(15 downto 0);
+signal esp_rom_data	: std_logic_vector(7 downto 0);
+signal esp_rom_wr	: std_logic;
+signal esp_txd		: std_logic;	-- UART lines, switched between loader and fa_control
+signal fac_txd		: std_logic;
+signal fac_rxd		: std_logic;
+-- the four ROM memories are written from either loader
+signal rom_wr_any	: std_logic;
+signal rom_wr_addr	: std_logic_vector(15 downto 0);
+signal rom_wr_data	: std_logic_vector(7 downto 0);
+
 begin
 -- options -- 0 if option Dip is set 
 opt_zc_emulation <= game_option(1);
@@ -365,8 +396,11 @@ port map(
    i_Fast_Clk => clk_50
 	); 
 
--- show errors at bootmessage 0=OK, 1=crc_error, 2=SDcard error
-crc_dig <= x"2" when crc_error = '1' else x"1" when sdcard_error = '0' else x"F";
+-- status digit of the boot message: blank = ROM from SD ok, 1 = SD card error
+-- (sdcard_error is active low), 2 = SD crc error, 3 = ROM from the ESP32 (HW 2.0
+-- only). While the ESP path is taken SD_Card stays in reset and reports no error
+-- either; esp_rom_ok comes first all the same, so the source is always visible.
+crc_dig <= x"3" when esp_rom_ok = '1' else x"2" when crc_error = '1' else x"1" when sdcard_error = '0' else x"F";
 -- show '2' in case MPU200 is selected
 mpu200_dig <= x"2" when is_MPU200 = '1' else x"F";
 BM: entity work.boot_message
@@ -446,7 +480,8 @@ SD_CARD: entity work.SD_Card
 port map(
 	i_clk		=> clk_50, 	
 	-- Control/Data Signals,
-   i_Rst_L  => boot_phase(1), -- first dip read finished
+   -- first dip read finished AND the ESP32 has no ROM for us (always so on HW 1.x)
+   i_Rst_L  => boot_phase(1) and esp_rom_no,
 	-- PMOD SPI Interface
    o_SPI_Clk  => SDcard_CLK,
    i_SPI_MISO => MISO,
@@ -459,11 +494,14 @@ port map(
 	data_sd_card => data_sd_card,
 	wr_rom => wr_rom,
 	-- control CPU
-	cpu_reset_l => boot_phase(2),	
+	cpu_reset_l => sd_cpu_reset_l,
 	-- feedback
 	crc_error => crc_error,
 	SDcard_error => SDcard_error
-	);	
+	);
+
+-- phase 2 starts when the ROM is in, from whichever source
+boot_phase(2) <= sd_cpu_reset_l or esp_rom_ok;
 
 	
 -----------------------------------------------
@@ -551,6 +589,8 @@ port map(
 	dig1 => g_dig1,
 	dig2 => g_dig2
 	);
+-- the same three digits in one vector, for FA-Control's opcode 8 (unused without it)
+g_digits <= g_dig2 & g_dig1 & g_dig0;
 -- for willfa option to visiualize
 CONVO: entity work.byte_to_decimal
 port map(
@@ -780,52 +820,58 @@ rom_U6_cs <= '1' when ( cpu_addr(15 downto 11) = "01011" or cpu_addr(15 downto 1
 -- need to be mapped to MPU memory  address range
 ------------------
 
--- address selection	
--- read from SD and write to ram when wr_rom == 1
-rom_address <= address_sd_card(10 downto 0) when wr_rom = '1' else	
+-- address selection
+-- read from SD (or the ESP32) and write to ram when rom_wr_any == 1.
+-- The two loaders never run together: SD_Card is held in reset while
+-- esp_rom_busy = '1'. On HW 1.x esp_rom_busy is constant '0' and this is the old path.
+rom_wr_any  <= wr_rom or esp_rom_wr;
+rom_wr_addr <= esp_rom_addr when esp_rom_busy = '1' else address_sd_card;
+rom_wr_data <= esp_rom_data when esp_rom_busy = '1' else data_sd_card;
+
+rom_address <= rom_wr_addr(10 downto 0) when rom_wr_any = '1' else
 	cpu_addr(10 downto 0);
-	
+
 
 -- ( Stern U1 ) U2 ROM first half   		0x1000 - 0x17FF 
-rom_U1_wre <= '1' when address_sd_card(15 downto 11) = "00000" and wr_rom = '1' else '0';
+rom_U1_wre <= '1' when rom_wr_addr(15 downto 11) = "00000" and rom_wr_any = '1' else '0';
 U1: entity work.rom
 port map(
 	address => rom_address,	
 	clock => clk_50,
-	data => data_sd_card,
+	data => rom_wr_data,
 	wren => rom_U1_wre,
 	q	=> rom_U1_dout
 	);
 
 -- ( Stern U2 ) U2 ROM second half  		0x5000 - 0x57FF ( Stern U2 )
-rom_U2_wre <= '1' when address_sd_card(15 downto 11) = "00001" and wr_rom = '1' else '0';
+rom_U2_wre <= '1' when rom_wr_addr(15 downto 11) = "00001" and rom_wr_any = '1' else '0';
 U2: entity work.rom
 port map(
 	address => rom_address,	
 	clock => clk_50,
-	data => data_sd_card,
+	data => rom_wr_data,
 	wren => rom_U2_wre,
 	q	=> rom_U2_dout
 	);
 
 -- ( Stern U5 ) U6 ROM first half   		0x1800 - 0x1FFF ( Stern U5 )
-rom_U5_wre <= '1' when address_sd_card(15 downto 11) = "00010" and wr_rom = '1' else '0';
+rom_U5_wre <= '1' when rom_wr_addr(15 downto 11) = "00010" and rom_wr_any = '1' else '0';
 U5: entity work.rom
 port map(
 	address => rom_address,	
 	clock => clk_50,
-	data => data_sd_card,
+	data => rom_wr_data,
 	wren => rom_U5_wre,
 	q	=> rom_U5_dout
 	);
 
 -- ( Stern U6 ) U6 ROM second half  		0x5800 - 0x5FFF ( Stern U6 )
-rom_U6_wre <= '1' when address_sd_card(15 downto 11) = "00011" and wr_rom = '1' else '0';
+rom_U6_wre <= '1' when rom_wr_addr(15 downto 11) = "00011" and rom_wr_any = '1' else '0';
 U6: entity work.rom
 port map(
 	address => rom_address,	
 	clock => clk_50,
-	data => data_sd_card,
+	data => rom_wr_data,
 	wren => rom_U6_wre,
 	q	=> rom_U6_dout
 	);
@@ -999,11 +1045,47 @@ SB_A12	<= not cpu_addr(12);
 ------------------------------------------------------------------------------
 gen_fa_control: if HAS_ESP32 generate
 
+------------------------------------------------------------------------------
+-- Game ROM from the ESP32 (rtl/fa_control/esp_rom_loader.vhd). Runs right after
+-- the dip scan - the same moment U1 hands GS_DIPS over to the ESP - and before any
+-- LISY session. The request names the board ("SternFA", the same string as FAC's
+-- HW_NAME) and asks for 16 sectors = 8 kB, which is all SternFA uses of a game
+-- slot; FA-Control keeps the roms as /roms/SternFA/<nnn>.bin. While it is busy it owns both UART lines: fa_control hears idle
+-- ('1') and its txd is not on the pin. fa_control itself keeps its reset on
+-- boot_phase(1), so FA-Control still connects when the SD card fails.
+-- game: the SD card index is 'not game_select' (a dip that is ON reads '0'), the
+-- ESP gets the very same number.
+------------------------------------------------------------------------------
+ESPROM: entity work.esp_rom_loader
+generic map(
+	CLKS_PER_BIT => 434,		-- 50 MHz / 115200 baud, like FAC
+	HW_NAME      => "SternFA",	-- must match FAC's HW_NAME
+	ROM_SECTORS  => 16		-- 8 kB: U1, U2, U5, U6 at 2 kB each
+	)
+port map(
+	clk      => clk_50,
+	reset    => not boot_phase(1),
+	game     => not game_select,
+	rxd      => GS_DIPS,		-- through U1, like FAC
+	txd      => esp_txd,
+	busy     => esp_rom_busy,
+	rom_ok   => esp_rom_ok,
+	rom_no   => esp_rom_no,
+	rom_addr => esp_rom_addr,
+	rom_data => esp_rom_data,
+	rom_wr   => esp_rom_wr
+	);
+
+fac_rxd      <= GS_DIPS when esp_rom_busy = '0' else '1';
+ESP32_ser_rx <= esp_txd when esp_rom_busy = '1' else fac_txd;
+
+
 FAC: entity work.fa_control
 generic map(
 	CLKS_PER_BIT => 434,		-- 50 MHz / 115200 baud
 	HW_NAME      => "SternFA",
 	API_VER      => "0.12",
+	GAME_DIGITS  => 3,		-- full game number, FA-Control files it under SternFA/<nnn>
 	N_LAMPS      => FA_N_LAMPS,
 	N_SOL        => FA_N_SOL,
 	N_SOUNDS     => 0,		-- SB-300 sound is not driven during a takeover
@@ -1019,15 +1101,15 @@ generic map(
 port map(
 	clk         => clk_50,
 	reset       => not boot_phase(1),
-	rxd         => GS_DIPS,		-- ESP sends -> FPGA receives (through U1)
-	txd         => ESP32_ser_rx,	-- FPGA sends -> ESP receives
+	rxd         => fac_rxd,		-- ESP sends -> FPGA receives (through U1), idle while ESPROM loads
+	txd         => fac_txd,		-- FPGA sends -> ESP receives, ESPROM has the pin while loading
 	ctrl_req    => OPT_DIPS,	-- through U2, active low, driven by the mux
 	ctrl_allow  => not game_option(5),
 	ctrl_active => fa_ctrl_active,
 	ver_main    => SW_MAIN,
 	ver_sub1    => SW_SUB1,
 	ver_sub2    => SW_SUB2,
-	game_info   => g_dig0,		-- one digit only; the units digit of the game number
+	game_info   => g_digits,	-- game number as on the boot display, 000..255
 	sw_state    => fa_sw_state,
 	lamp_ovr    => fa_lamp_ovr,
 	sol_ovr     => fa_sol_ovr,
@@ -1112,6 +1194,13 @@ end generate;
 gen_no_fa_control: if not HAS_ESP32 generate
 	fa_ctrl_active <= '0';
 	ESP32_ser_rx   <= '1';
+	-- no ESP, no ROM from it: SD_Card starts right after the dip scan as it always did
+	esp_rom_busy   <= '0';
+	esp_rom_ok     <= '0';
+	esp_rom_no     <= '1';
+	esp_rom_addr   <= (others => '0');
+	esp_rom_data   <= (others => '0');
+	esp_rom_wr     <= '0';
 	fa_u10_pa      <= (others => '0');
 	fa_u11_pa      <= (others => '0');
 	fa_u11_pb      <= (others => '0');

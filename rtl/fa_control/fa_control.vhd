@@ -34,7 +34,12 @@
 --                         Bei AtariFA ist das GPIO10 des ESP32-C3 an FPGA-PIN_11,
 --                         active low, mit Weak-Pull-Up im FPGA: kein Host gesteckt
 --                         = high = keine Anforderung.
---   * ctrl_allow= '1'  -- Freigabe durch den Betreiber (bei AtariFA Options-DIP 4).
+--   * ctrl_allow= '1'  -- Freigabe durch den Betreiber. Die DIP-Nummer ist je Projekt
+--                         verschieden: AtariFA Options-DIP 4, SternFA Options-DIP 5
+--                         (S2/S7-Dip5, im Top-Level not game_option(5); Handbuch
+--                         Kapitel 4.2.5 und 9.1). ACHTUNG: die Meldung, die der
+--                         Betreiber in FA-Control zu sehen bekommt, nennt weiterhin
+--                         DIP 4 - der Text steht in der ESP32-Firmware, nicht hier.
 -- Erst der Opcode 100 (LISY_INIT) schaltet dann ctrl_active auf '1'. Die Antwort auf
 -- 100 sagt dem Host, woran es lag:
 --      0 = Kontrolle gewaehrt
@@ -114,7 +119,12 @@ entity fa_control is
 		-- Byte beenden die Uebernahme. 0 = abgeschaltet.
 		-- FA_Control sendet den Watchdog-Opcode alle 500 ms.
 		WD_TIMEOUT_MS : integer := 2000;
-		PULSE_MS_DEF : integer := 50
+		PULSE_MS_DEF : integer := 50;
+		-- Stellen der Spielnummer bei Opcode 8. FA-Control legt Namensdateien und
+		-- Spiel-ROMs unter <HW>/<nnn> ab; eine einzelne Ziffer laesst Spiel 5, 15 und
+		-- 105 zusammenfallen. SternFA meldet deshalb 3. Der Default 1 haelt das Modul
+		-- zu Kopien kompatibel, die game_info noch vierbittig anschliessen (AtariFA).
+		GAME_DIGITS  : integer := 1
 	);
 	port (
 		clk         : in  std_logic;                        -- 50 MHz
@@ -131,7 +141,8 @@ entity fa_control is
 		ver_main    : in  std_logic_vector(3 downto 0);     -- als ASCII-Ziffern gesendet,
 		ver_sub1    : in  std_logic_vector(3 downto 0);     -- Format "M.S1.S2"
 		ver_sub2    : in  std_logic_vector(3 downto 0);
-		game_info   : in  std_logic_vector(3 downto 0);     -- eine Ziffer, Opcode 8
+		-- Opcode 8: GAME_DIGITS BCD-Ziffern, hoechstwertige links
+		game_info   : in  std_logic_vector(4 * GAME_DIGITS - 1 downto 0);
 		-- Istzustand (wird immer gelesen, auch ohne Uebernahme)
 		sw_state    : in  std_logic_vector(MAX_SW - 1 downto 0);   -- '1' = geschlossen
 		-- Sollzustand (nur gueltig solange ctrl_active = '1')
@@ -329,9 +340,10 @@ begin
 					when 4      => tx_next <= ascii_digit(ver_sub2);
 					when others => tx_next <= x"00";
 				end case;
-			when SRC_GAME =>                       -- eine Ziffer + NUL
-				if tx_idx = 0 then
-					tx_next <= ascii_digit(game_info);
+			when SRC_GAME =>                       -- GAME_DIGITS Ziffern + NUL
+				if tx_idx < GAME_DIGITS then
+					tx_next <= ascii_digit(game_info(4 * (GAME_DIGITS - tx_idx) - 1
+					                                 downto 4 * (GAME_DIGITS - 1 - tx_idx)));
 				else
 					tx_next <= x"00";
 				end if;
@@ -541,7 +553,7 @@ begin
 							when OP_G_LISY_VER =>
 								tx_src <= SRC_VER;   tx_len <= 6;   -- "M.S1.S2" + NUL
 							when OP_G_GAME_INFO =>
-								tx_src <= SRC_GAME;  tx_len <= 2;   -- Ziffer + NUL
+								tx_src <= SRC_GAME;  tx_len <= GAME_DIGITS + 1;   -- Ziffern + NUL
 							when OP_G_NO_LAMPS =>
 								tx_b0 <= to_byte(N_LAMPS);   tx_len <= 1;
 							when OP_G_NO_SOL =>
