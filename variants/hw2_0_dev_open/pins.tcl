@@ -6,19 +6,30 @@
 # Stern.qsf of SternFA_HW2.0_Cyclone_dev_open - NOT re-derived here. This board is a
 # prototype; a wrong pin at reset, blanking or a solenoid can damage hardware.
 #
-# GS_DIPS (PIN_69) and OPT_DIPS (PIN_71) are the two 74LVC1G157 multiplexer outputs
-# U1/U2 on this board. Until SOL_EN goes low at the end of boot phase 1 they carry
-# the game select and option DIP returns exactly as on HW 1.x - which is why they
-# keep those names in the shared top level; afterwards they carry the ESP32's TX and
-# its ctrl_req. They used to be called U1_SW / U2_SW in the HW 2.0 copy of the top
-# level.
+# NAMENSFALLE. GS_DIPS (PIN_69) and OPT_DIPS (PIN_71) are the two 74LVC1G157
+# multiplexer OUTPUTS U1/U2 on this board - in the v2.00 schematic those two FPGA pins
+# are called U1_SW / U2_SW, which is also what the HW 2.0 copy of the top level called
+# them. The nets named GS_Dips / Opt_Dips on v2.00 are DIFFERENT nets: they sit on the
+# INPUT side of U1/U2 and never reach the FPGA at all. The ports keep the old names
+# because until SOL_EN goes low at the end of boot phase 1 they carry the game select
+# and option DIP returns exactly as on HW 1.x; afterwards they carry the ESP32's TX and
+# its ctrl_req.
 #
-# No WEAK_PULL_UP anywhere on this board:
+# No WEAK_PULL_UP anywhere on this board - but read the second point, it cost a board:
 #  - reset_sw (PIN_89) and SW_Selftest (PIN_90) are on dedicated clock input pins of
 #    the EP4CE6E22, which cannot have one ("Error 169057"). SW2/SW3 on the dev_open
 #    board have their own external pull-up.
-#  - GS_DIPS/OPT_DIPS are actively driven by U1/U2 (on HW 1.x the same signals came
-#    straight from the DIP banks and needed one).
+#  - GS_DIPS/OPT_DIPS (PIN_69/71) are actively driven by U1/U2 and need none. That is
+#    NOT the whole story though: on HW 1.x the FPGA's internal pull-up on these pins
+#    was the ONLY pull-up of the two DIP return lines. On v2.00 the muxes put it on the
+#    far side, where it cannot reach GS_Dips / Opt_Dips any more - those two nets end
+#    at S5/S7 and at one CMOS input each, and nothing biases them. The first assembled
+#    v2.00 measured 0.9 V there (open input, inside the forbidden band of the '157),
+#    read every dip as 0 and booted into an SD error. The pull-up is now a COMPONENT on
+#    the input side: 10k from GS_Dips to +3V and 10k from Opt_Dips to +3V, to be fitted
+#    from PCB v2.01 on. The prototype has them soldered across U1/U2 pin 1 to pin 5.
+#    Nothing in the FPGA can substitute for them - the diodes at the dip switches only
+#    ever pull those lines down.
 set_location_assignment PIN_91 -to clk_50
 set_location_assignment PIN_89 -to reset_sw
 set_location_assignment PIN_90 -to SW_Selftest

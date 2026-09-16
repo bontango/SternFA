@@ -2,6 +2,31 @@
 -- bontango 01.2025
 --
 -- v 1.0 
+--
+-- ---------------------------------------------------------------------------
+-- Which physical switch ends up in which bit - do not "tidy" this up.
+--
+-- game_option is declared 1 to 6 HERE and 6 downto 1 in the top level. Ports are
+-- associated by position, so formal(1) is the top level's game_option(6), formal(2)
+-- its (5) and so on: the association REVERSES the order. The strobe order at the
+-- option bank reverses it a second time, and the two cancel out - which is why
+-- switch n of the option bank is the top level's game_option(n), exactly as the
+-- manual numbers them:
+--
+--   S2/S7   strobe            top level      what it does
+--   Dip1    U11_PB6  (7)      game_option(1) zero cross emulator
+--   Dip2    U11_PB1  (0)      game_option(2) nvram -> FRAM
+--   Dip3    U11_PB0  (1)      game_option(3) force Bally
+--   Dip4    U10_CB2  (2)      game_option(4) anti flicker
+--   Dip5    U11_PB4  (3)      game_option(5) FA-Control permission
+--   Dip6    U11_CB2  (4)      game_option(6) nvram init
+--
+-- game_select has the same range in both places and needs none of this: switch n of
+-- the game select bank is game_select(n-1), read at strobe n-1.
+--
+-- A dip that is ON reads as '0' here; the display and the SD card index use the
+-- inverted value (byte_to_decimal converts "not mybyte").
+-- ---------------------------------------------------------------------------
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
