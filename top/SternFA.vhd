@@ -296,7 +296,7 @@ constant SW_MAIN : std_logic_vector(3 downto 0) := BOARD_ID;
 -- references in the NOT taken branch of an if..generate too (Error 10481); the
 -- boards without the socket pay compile time and no logic.
 --
--- The ESP may take over when it asks via ctrl_req AND option DIP 5 is ON. While it
+-- The ESP may take over when it asks via ctrl_req AND option DIP 4 is ON. While it
 -- has control the CPU is held in reset and fa_io_bally drives the PIA pins instead
 -- of the game. Protocol and numbering: see rtl/fa_control/fa_control.vhd.
 --
@@ -360,10 +360,13 @@ begin
 opt_zc_emulation <= game_option(1);
 opt_fram <= game_option(2);
 opt_force_Bally <= not game_option(3);
-opt_anti_flicker <= game_option(4);
--- game_option(5) has no signal of its own: on PCB v2.00 it is the FA-Control
+-- Dip4 and Dip5 swapped in .0.6 (19.09.2026): anti flicker was Dip4 up to 5.0.6 as
+-- first released. Dip4 is the FA-Control permission now, as on AtariFA - that is the
+-- number the FA-Control web interface names in its message.
+opt_anti_flicker <= game_option(5);
+-- game_option(4) has no signal of its own: on PCB v2.00 it is the FA-Control
 -- permission and is read directly at the ctrl_allow port of the FAC instance at the
--- end of this file. On the older boards it is unused, as the manuals up to v1.04 say.
+-- end of this file. On the older boards it is unused.
 opt_nvram_init <= game_option(6);
 
 -- determine type of CPU all games <=63 are MPU-200 games, except we have the 'Bally force' option
@@ -1038,8 +1041,9 @@ SB_A12	<= not cpu_addr(12);
 -- SOL_EN = '1' and GS_DIPS/OPT_DIPS still carry the dip returns, which the UART
 -- receiver would happily mistake for start bits.
 --
--- ctrl_allow = not game_option(5): option DIP 5, listed as "not used" in the
--- manual until v2.00. Unlike AtariFA this is NOT read continuously -- after boot
+-- ctrl_allow = not game_option(4): option DIP 4, the same number as on AtariFA
+-- (it was DIP 5 until the Dip4/Dip5 swap in .0.6). Unlike AtariFA this is NOT
+-- read continuously -- after boot
 -- the dip lines are physically switched over to the ESP32, so the value is the one
 -- latched at boot and only a reset can change it.
 ------------------------------------------------------------------------------
@@ -1104,7 +1108,7 @@ port map(
 	rxd         => fac_rxd,		-- ESP sends -> FPGA receives (through U1), idle while ESPROM loads
 	txd         => fac_txd,		-- FPGA sends -> ESP receives, ESPROM has the pin while loading
 	ctrl_req    => OPT_DIPS,	-- through U2, active low, driven by the mux
-	ctrl_allow  => not game_option(5),
+	ctrl_allow  => not game_option(4),
 	ctrl_active => fa_ctrl_active,
 	ver_main    => SW_MAIN,
 	ver_sub1    => SW_SUB1,

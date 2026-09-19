@@ -16,7 +16,8 @@ v1.1 19.09.2026
 > Fassungen gleich.
 >
 > Diese Anleitung beschreibt **Hardware-Version 2.0** mit Software **5.06**. Für die älteren
-> Platinen (HW 1.0 und HW 1.1) gilt weiterhin `SternFA_user manual_v1.04.pdf`. Was sich
+> Platinen (HW 1.0 und HW 1.1) gilt weiterhin `SternFA_user manual_v1.04.pdf` — mit einer
+> Ausnahme: ab Software x.06 liegt Anti-Flicker auf Options-**Dip5**, nicht auf Dip4 (Kapitel 4.2). Was sich
 > zwischen den beiden Platinengenerationen geändert hat, steht in Kapitel 12.
 
 ## Inhaltsverzeichnis
@@ -33,8 +34,8 @@ v1.1 19.09.2026
     - [4.2.1. S2-Dip1 -> Zero-Cross-Emulator](#421-s2-dip1---zero-cross-emulator)
     - [4.2.2. S2-Dip2 -> nvram-Inhalt ins FRAM sichern](#422-s2-dip2---nvram-inhalt-ins-fram-sichern)
     - [4.2.3. S2-Dip3 -> Bally-Spiel erzwingen](#423-s2-dip3---bally-spiel-erzwingen)
-    - [4.2.4. S2-Dip4 -> Anti-Flicker für Spiele mit LEDs](#424-s2-dip4---anti-flicker-für-spiele-mit-leds)
-    - [4.2.5. S2-Dip5 -> FA-Control die Übernahme erlauben](#425-s2-dip5---fa-control-die-übernahme-erlauben)
+    - [4.2.4. S2-Dip4 -> FA-Control die Übernahme erlauben](#424-s2-dip4---fa-control-die-übernahme-erlauben)
+    - [4.2.5. S2-Dip5 -> Anti-Flicker für Spiele mit LEDs](#425-s2-dip5---anti-flicker-für-spiele-mit-leds)
     - [4.2.6. S2-Dip6 -> nvram initialisieren](#426-s2-dip6---nvram-initialisieren)
   - [4.3. Alle 14 DIP-Schalter werden einmal beim Start gelesen](#43-alle-14-dip-schalter-werden-einmal-beim-start-gelesen)
 - [5. Startvorgang](#5-startvorgang)
@@ -48,7 +49,7 @@ v1.1 19.09.2026
 - [7. Die SD-Karte](#7-die-sd-karte)
 - [8. Credits und Highscores](#8-credits-und-highscores)
 - [9. Die FA-Control-Schnittstelle (ESP32-C3)](#9-die-fa-control-schnittstelle-esp32-c3)
-  - [9.1. Die Freigabe: Options-DIP 5](#91-die-freigabe-options-dip-5)
+  - [9.1. Die Freigabe: Options-DIP 4](#91-die-freigabe-options-dip-4)
   - [9.2. Was während der Übernahme passiert](#92-was-während-der-übernahme-passiert)
   - [9.3. Wie die Kontrolle wieder zurückgeht](#93-wie-die-kontrolle-wieder-zurückgeht)
   - [9.4. Was die Weboberfläche von der Platine erfährt](#94-was-die-weboberfläche-von-der-platine-erfährt)
@@ -201,15 +202,14 @@ mit einer Nummer unter 64 mit dem höheren MPU-200-Prozessortakt laufen.
 Das mitgelieferte Stern-Image enthält Stern- und Bally-Spiele bereits mit der richtigen
 Nummerierung; damit brauchen Sie diese Option **nicht**.
 
-#### 4.2.4. S2-Dip4 -> Anti-Flicker für Spiele mit LEDs
+> **Dip4 und Dip5 haben in Software 5.06 die Plätze getauscht.** Anti-Flicker lag bisher auf
+> Dip4 und liegt jetzt auf Dip5; Dip4 ist die FA-Control-Freigabe, derselbe Schalter wie bei
+> AtariFA. Wer von einer älteren Version kommt und Anti-Flicker benutzt, legt diesen Schalter
+> von 4 auf 5 um.
 
-Mit Dip4 auf **ON** ändert SternFA das Timing des Zero-Cross-Signals. Bally-Spiele sind für
-flackernde LED-Ersatzlampen bekannt; üblicherweise braucht jede LED dafür einen Widerstand
-parallel. Mit dieser Option flackern die LEDs auch ohne die zusätzlichen Widerstände nicht.
+#### 4.2.4. S2-Dip4 -> FA-Control die Übernahme erlauben
 
-#### 4.2.5. S2-Dip5 -> FA-Control die Übernahme erlauben
-
-**Neu bei Hardware 2.0.** Auf den älteren Platinen hatte dieser Schalter keine Funktion.
+**Neu bei Hardware 2.0.** Auf den älteren Platinen hat dieser Schalter keine Funktion.
 
 **ON** erlaubt einem ESP32-C3-Modul im Steckplatz X7, den Automaten zu Testzwecken zu übernehmen
 — siehe Kapitel 9. Steht der Schalter auf **OFF**, darf das Modul nur mitlesen; Lampen, Spulen
@@ -217,6 +217,12 @@ und Displays kann es dann nie ansteuern.
 
 Wenn kein ESP32-Modul im Steckplatz sitzt, lassen Sie den Schalter auf OFF. Es ändert so oder so
 nichts, aber OFF ist die Stellung, die Sie nicht überraschen kann.
+
+#### 4.2.5. S2-Dip5 -> Anti-Flicker für Spiele mit LEDs
+
+Mit Dip5 auf **ON** ändert SternFA das Timing des Zero-Cross-Signals. Bally-Spiele sind für
+flackernde LED-Ersatzlampen bekannt; üblicherweise braucht jede LED dafür einen Widerstand
+parallel. Mit dieser Option flackern die LEDs auch ohne die zusätzlichen Widerstände nicht.
 
 #### 4.2.6. S2-Dip6 -> nvram initialisieren
 
@@ -242,7 +248,7 @@ physikalisch nicht mehr verbunden.
 Die praktische Folge: **nach jeder Schalteränderung aus- und einschalten**, oder den Reset-Taster
 SW2 auf der FPGA-Platine drücken.
 
-Das heißt auch, dass sich die FA-Control-Freigabe aus 4.2.5 während einer laufenden Übernahme
+Das heißt auch, dass sich die FA-Control-Freigabe aus 4.2.4 während einer laufenden Übernahme
 nicht zurücknehmen lässt — siehe Kapitel 9.3.
 
 ## 5. Startvorgang
@@ -376,21 +382,20 @@ verhält sich exakt so wie ohne.
 > Versuch, mit einem Automaten, den Sie notfalls ausschalten können. Kapitel 13 sagt, worauf
 > zuerst zu schauen ist.
 
-### 9.1. Die Freigabe: Options-DIP 5
+### 9.1. Die Freigabe: Options-DIP 4
 
 Ein Testgerät soll nicht ungefragt in ein laufendes Spiel eingreifen können. Deshalb müssen
 **zwei Dinge** zusammenkommen:
 
 1. Das ESP32-Modul fragt aktiv an („ich möchte übernehmen").
-2. **Options-DIP 5 steht auf ON.**
+2. **Options-DIP 4 steht auf ON.**
 
-Steht Option 5 auf OFF, verweigert die Weboberfläche die Übernahme, und das Spiel läuft
-ungestört weiter. Lesen darf das Modul trotzdem: Schalterzustände lassen sich also auch bei
-laufendem Spiel mitverfolgen, ohne etwas freizugeben.
+Steht Option 4 auf OFF, verweigert die Weboberfläche die Übernahme mit der Meldung *„DIP 4"*,
+und das Spiel läuft ungestört weiter. Lesen darf das Modul trotzdem: Schalterzustände lassen
+sich also auch bei laufendem Spiel mitverfolgen, ohne etwas freizugeben.
 
-> **Achtung, die Meldung nennt die falsche Nummer.** FA-Control schreibt in diesem Fall
-> *„DIP 4"*. Der Text stammt aus AtariFA, wo die Freigabe tatsächlich auf Options-DIP 4
-> liegt, und sitzt in der ESP32-Firmware. **Bei SternFA ist es Options-DIP 5.**
+> Bis zum ersten 5.06-Build lag die Freigabe auf Options-DIP 5, und die Meldung nannte den
+> falschen Schalter. Seit 5.06 ist es wie bei AtariFA DIP 4, und die Meldung stimmt.
 
 ### 9.2. Was während der Übernahme passiert
 
@@ -414,8 +419,8 @@ Werkbank.
 - **Automaten aus- und einschalten**, oder SW2 drücken.
 
 > **Der Options-DIP ist bei SternFA kein Not-Aus.** Anders als bei AtariFA, wo Option 4
-> fortlaufend gelesen wird, ist DIP 5 hier der beim Start übernommene Wert — nach dem Start
-> liegen die DIP-Leitungen physikalisch am ESP32 (Kapitel 4.3). DIP 5 während einer Übernahme
+> fortlaufend gelesen wird, ist DIP 4 hier der beim Start übernommene Wert — nach dem Start
+> liegen die DIP-Leitungen physikalisch am ESP32 (Kapitel 4.3). DIP 4 während einer Übernahme
 > auf OFF zu stellen bewirkt bis zum nächsten Reset nichts. Die Wege heraus sind: Modul ziehen,
 > Weboberfläche, oder Reset.
 
@@ -501,7 +506,7 @@ Worauf zu achten ist:
 
 - **Das Modul muss beim Einschalten wach sein** (S9-DIP1 auf ON). Im Tiefschlaf antwortet es
   nicht, und SternFA nimmt nach 3 Sekunden die SD-Karte.
-- **Options-DIP 5 spielt hier keine Rolle.** Er gibt nur die Übernahme frei (9.1). Die
+- **Options-DIP 4 spielt hier keine Rolle.** Er gibt nur die Übernahme frei (9.1). Die
   Spielauswahl über das Modul funktioniert auch ohne ihn.
 - **Das nvram bleibt im FRAM der Platine**, genau wie beim Start von SD-Karte. Credits und
   Highscores hängen an der Spielnummer, nicht an der Quelle des ROMs.
@@ -565,7 +570,8 @@ Wer die älteren Platinen kennt, für den ist das die Kurzfassung:
   dazu die beiden Multiplexer U1 und U2, die die beiden DIP-Rückleitungen nach dem Start an das
   Modul übergeben. Das ist es, was Kapitel 9 möglich macht — und was Kapitel 4.3 von einer
   Konvention zu einer physikalischen Tatsache macht.
-- **Options-DIP 5 hat jetzt eine Funktion** (FA-Control-Freigabe). Vorher war er unbenutzt.
+- **Options-DIP 4 ist die FA-Control-Freigabe**, Anti-Flicker ist auf DIP 5 gewandert (ab
+  5.06, auf allen Platinen). Bis 5.05 war es umgekehrt.
 - **Spiel-ROMs können vom ESP32 kommen** (ab 5.0.6, Kapitel 9.7). Die SD-Karte ist dann
   nicht mehr nötig.
 - **Auf PCB v2.00 fehlen zwei Pull-up-Widerstände an den DIP-Rückleitungen**; sie müssen von
@@ -574,8 +580,8 @@ Wer die älteren Platinen kennt, für den ist das die Kurzfassung:
   nicht ausgewertet.
 
 Alles, was für den Spieler zählt, ist unverändert: dieselben Steckverbinder, dieselben
-Befestigungslöcher, dieselbe Spieleliste, dasselbe SD-Karten-Image, dieselben Optionen 1 bis 4
-und 6.
+Befestigungslöcher, dieselbe Spieleliste, dasselbe SD-Karten-Image, dieselben Optionen 1 bis 3
+und 6 — Option 4 (Anti-Flicker) liegt jetzt auf DIP 5.
 
 ## 13. Noch nicht umgesetzt, und bekannte Grenzen
 
@@ -604,9 +610,10 @@ und 6.
 - **SW3 auf der FPGA-Platine tut nichts.** Der Taster liegt am FPGA und ist reserviert; bislang
   hat ihn keine Softwareversion benutzt. Der Selbsttest liegt auf S6 „Bally Test" und auf dem
   Schalter in der Münztür.
-- **Options-DIP 5 hat seine Bedeutung geändert.** Auf den älteren Platinen war er als „nicht
-  benutzt" dokumentiert. Wenn Sie Einstellungen aus einer älteren Anleitung übernehmen, schauen
-  Sie sich diesen Schalter an.
+- **Options-DIP 4 und 5 haben ihre Bedeutung geändert.** Bis 5.05 (und in allen älteren
+  Anleitungen) war DIP 4 Anti-Flicker und DIP 5 unbenutzt bzw. die FA-Control-Freigabe. Seit
+  5.06 ist DIP 4 die FA-Control-Freigabe und DIP 5 Anti-Flicker. Wenn Sie Einstellungen aus
+  einer älteren Anleitung übernehmen, schauen Sie sich beide Schalter an.
 
 ---
 
@@ -869,8 +876,8 @@ siebenstellige Anzeigen, `Special` = Sonderfassung.
   1  + 1                                1  Zero-Cross-Emulator
   2  + 2                                2  nvram fortlaufend sichern
   3  + 4                                3  Bally-Takt erzwingen
-  4  + 8                                4  Anti-Flicker für LEDs
-  5  + 16                               5  FA-Control-Übernahme erlauben
+  4  + 8                                4  FA-Control-Übernahme erlauben
+  5  + 16                               5  Anti-Flicker für LEDs
   6  + 32                               6  nvram beim Start löschen
   7  + 64
   8  + 128                             Grundeinstellung: alles OFF

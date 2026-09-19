@@ -34,10 +34,10 @@ three constants, and which folder the memory and PLL megafunctions come out of.
 
 | Variant | PCB | FPGA board | Device | Version | Status |
 |---|---|---|---|---|---|
-| `hw1_0_cyclone_IV` | SternFA v1.00 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 1.0.5 | last release actually on this board: 1.0.3 |
-| `hw1_1_cyclone_IV` | SternFA v1.10 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 3.0.5 | last release actually on this board: 3.0.4 |
-| `hw1_1_cyclone_10` | SternFA v1.10 | Cyclone 10 piggy-back | 10CL006YE144C8G | 4.0.5 | lead variant; last release actually on this board: 4.0.4c |
-| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.6 | **prototype**, 5.0.6 bench tested, never in a machine; PCB v2.00 needs two pull-ups — see chapter 4 |
+| `hw1_0_cyclone_IV` | SternFA v1.00 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 1.0.6 | last release actually on this board: 1.0.3 |
+| `hw1_1_cyclone_IV` | SternFA v1.10 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 3.0.6 | last release actually on this board: 3.0.4 |
+| `hw1_1_cyclone_10` | SternFA v1.10 | Cyclone 10 piggy-back | 10CL006YE144C8G | 4.0.6 | lead variant; last release actually on this board: 4.0.4c |
+| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.6 | **prototype**, first 5.0.6 build bench tested, never in a machine; PCB v2.00 needs two pull-ups — see chapter 4 |
 
 ### Version numbering
 
@@ -56,10 +56,15 @@ The two sub digits are the software version and live in exactly one place,
 | Display latch strobes | generated in the FPGA, out on `DISP_LA_STR` | external CD4502, inhibit on `U10_CA2` | same as v1.10 |
 | Reset / self test switch | S8 / S9 on the SternFA PCB | S8 / S9 | SW2 / SW3 on the FPGA board |
 | ESP32-C3 socket X7 | — | — | yes, plus the two 74LVC1G157 multiplexers |
-| Option DIP 5 | unused | unused | FA-Control permission |
+| Option DIP 4 | unused | unused | FA-Control permission |
 
-Everything else — connectors, mounting holes, game list, SD card image, options 1–4
-and 6 — is the same on all three PCB revisions.
+Everything else — connectors, mounting holes, game list, SD card image, options 1–3,
+5 and 6 — is the same on all three PCB revisions.
+
+**Since .0.6 option DIP 4 and 5 are swapped on every board:** anti flicker moved from
+DIP 4 to DIP 5, and on v2.00 the FA-Control permission from DIP 5 to DIP 4 — the same
+number as on AtariFA, and the one the FA-Control web interface names. Up to x.05 (and
+the first 5.0.6 build of 19.09.2026) anti flicker is DIP 4.
 
 ## Layout
 
@@ -120,9 +125,10 @@ Game ROMs and the SD card image are not part of this tree.
 ## FA-Control on hardware 2.0
 
 **Fully integrated in the source and tested on the bench — but it has never run in a real
-machine.** `bin/hardware v2.0/dev_open/SternFA_506.jic` (19.09.2026) is bit-identical to
-the bitstream that was bench tested: boot display, DIP read, connect, board report, hand
-back, watchdog and the game ROM from the ESP32 work there.
+machine.** The first `SternFA_506.jic` (19.09.2026) was bench tested: boot display, DIP
+read, connect, board report, hand back, watchdog and the game ROM from the ESP32 work
+there. The `SternFA_506.jic` in `bin/` now is a rebuild of the same day with option DIP 4
+and 5 swapped; that rebuild itself has not been on hardware yet.
 
 **PCB v2.00 needs a rework.** `GS_Dips` and `Opt_Dips` have no pull-up: on v1.x the
 FPGA's internal one did it, on v2.0 the multiplexers U1/U2 put it on the wrong side.
@@ -170,7 +176,7 @@ on the older boards — which is why they keep those names in the shared top lev
 
 Three things, in this order:
 
-1. **Option DIP 5 is ON.** Latched at boot only; after boot the DIP lines are physically
+1. **Option DIP 4 is ON.** Latched at boot only; after boot the DIP lines are physically
    switched over to the ESP, so the DIP is **not an emergency stop** during a takeover.
    This differs from AtariFA, where the equivalent option is read continuously.
 2. The module pulls `ctrl_req` low.

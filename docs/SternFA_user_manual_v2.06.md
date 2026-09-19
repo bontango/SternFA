@@ -17,7 +17,8 @@ v1.1 19.09.2026
 > numbering is the same in both.
 >
 > This manual describes **hardware version 2.0** with software **5.06**. For the older
-> boards (HW 1.0 and HW 1.1) the manual `SternFA_user manual_v1.04.pdf` still applies.
+> boards (HW 1.0 and HW 1.1) the manual `SternFA_user manual_v1.04.pdf` still applies - with
+> one exception: from software x.06 on, anti flicker is option **Dip5**, not Dip4 (chapter 4.2).
 > What changed between the two board generations is listed in chapter 12.
 
 ## Table of contents
@@ -34,8 +35,8 @@ v1.1 19.09.2026
     - [4.2.1. S2-Dip1 -> zero cross emulator](#421-s2-dip1---zero-cross-emulator)
     - [4.2.2. S2-Dip2 -> save nvram content to FRAM](#422-s2-dip2---save-nvram-content-to-fram)
     - [4.2.3. S2-Dip3 -> force Bally game](#423-s2-dip3---force-bally-game)
-    - [4.2.4. S2-Dip4 -> anti flicker for games with LEDs](#424-s2-dip4---anti-flicker-for-games-with-leds)
-    - [4.2.5. S2-Dip5 -> allow FA-Control to take over](#425-s2-dip5---allow-fa-control-to-take-over)
+    - [4.2.4. S2-Dip4 -> allow FA-Control to take over](#424-s2-dip4---allow-fa-control-to-take-over)
+    - [4.2.5. S2-Dip5 -> anti flicker for games with LEDs](#425-s2-dip5---anti-flicker-for-games-with-leds)
     - [4.2.6. S2-Dip6 -> init nvram](#426-s2-dip6---init-nvram)
   - [4.3. All 14 DIP switches are read once, at boot](#43-all-14-dip-switches-are-read-once-at-boot)
 - [5. Boot sequence](#5-boot-sequence)
@@ -49,7 +50,7 @@ v1.1 19.09.2026
 - [7. The SD card](#7-the-sd-card)
 - [8. Credits and high scores](#8-credits-and-high-scores)
 - [9. The FA-Control interface (ESP32-C3)](#9-the-fa-control-interface-esp32-c3)
-  - [9.1. The permission: option DIP 5](#91-the-permission-option-dip-5)
+  - [9.1. The permission: option DIP 4](#91-the-permission-option-dip-4)
   - [9.2. What happens while it has control](#92-what-happens-while-it-has-control)
   - [9.3. How control is handed back](#93-how-control-is-handed-back)
   - [9.4. What the web interface learns from the board](#94-what-the-web-interface-learns-from-the-board)
@@ -199,15 +200,13 @@ with the higher MPU-200 processor clock.
 The Stern SD image provided includes both Stern and Bally games with the correct numbering, so
 with that image you do **not** need this option.
 
-#### 4.2.4. S2-Dip4 -> anti flicker for games with LEDs
+> **Dip4 and Dip5 swapped places in software 5.06.** Anti flicker used to be Dip4 and is Dip5
+> now; Dip4 is the FA-Control permission, the same switch as on AtariFA. If you move over from
+> an older version with anti flicker in use, move that switch from 4 to 5.
 
-With Dip4 **ON** SternFA changes the timing of the zero cross signal. Bally games are known for
-flickering LED replacement lamps; usually each LED needs a resistor in parallel to solve this.
-With this option the LEDs are flicker free without the additional resistors.
+#### 4.2.4. S2-Dip4 -> allow FA-Control to take over
 
-#### 4.2.5. S2-Dip5 -> allow FA-Control to take over
-
-**New in hardware 2.0.** On the older boards this switch had no function.
+**New in hardware 2.0.** On the older boards this switch has no function.
 
 **ON** allows an ESP32-C3 module plugged into socket X7 to take control of the machine for
 testing - see chapter 9. With the switch **OFF** the module can only read; it can never drive
@@ -215,6 +214,12 @@ lamps, coils or displays.
 
 If you have no ESP32 module in the socket, leave this OFF. It changes nothing either way, but
 OFF is the setting that cannot surprise you.
+
+#### 4.2.5. S2-Dip5 -> anti flicker for games with LEDs
+
+With Dip5 **ON** SternFA changes the timing of the zero cross signal. Bally games are known for
+flickering LED replacement lamps; usually each LED needs a resistor in parallel to solve this.
+With this option the LEDs are flicker free without the additional resistors.
 
 #### 4.2.6. S2-Dip6 -> init nvram
 
@@ -240,7 +245,7 @@ DIP switches.
 The practical consequence: **after changing any switch, power off and power on**, or press the
 reset button SW2 on the FPGA board.
 
-This also means the FA-Control permission of 4.2.5 cannot be revoked while a takeover is
+This also means the FA-Control permission of 4.2.4 cannot be revoked while a takeover is
 running - see chapter 9.3.
 
 ## 5. Boot sequence
@@ -367,21 +372,20 @@ does without.
 > worked on the bench. Treat the first takeover in a machine as an experiment, with the machine
 > you can afford to switch off. Chapter 13 lists what to look at first.
 
-### 9.1. The permission: option DIP 5
+### 9.1. The permission: option DIP 4
 
 A test tool must not be able to interfere with a running game unasked. So **two things** have to
 come together:
 
 1. The ESP32 module actively asks ("I would like to take over").
-2. **Option DIP 5 is ON.**
+2. **Option DIP 4 is ON.**
 
-With option 5 OFF, the web interface refuses to take over and the game carries on undisturbed.
-Reading is still allowed: you can follow switch states during a running game without giving
-anything up.
+With option 4 OFF, the web interface refuses to take over with the message *"DIP 4"*, and the
+game carries on undisturbed. Reading is still allowed: you can follow switch states during a
+running game without giving anything up.
 
-> **Careful, the message names the wrong number.** FA-Control writes *"DIP 4"* here. That text
-> comes from AtariFA, where the permission really is on option DIP 4, and it lives in the ESP32
-> firmware. **On SternFA it is option DIP 5.**
+> Up to the first 5.06 build the permission was on option DIP 5, and the message named the wrong
+> switch. Since 5.06 it is DIP 4, as on AtariFA, and the message is right.
 
 ### 9.2. What happens while it has control
 
@@ -403,8 +407,8 @@ only take control in attract mode or on the bench.
 - **Switch the machine off and on**, or press SW2.
 
 > **The option DIP is not an emergency stop on SternFA.** Unlike AtariFA, where option 4 is read
-> continuously, DIP 5 here is the value latched at boot - after boot the DIP lines are physically
-> switched over to the ESP32 (chapter 4.3). Setting DIP 5 to OFF during a takeover does nothing
+> continuously, DIP 4 here is the value latched at boot - after boot the DIP lines are physically
+> switched over to the ESP32 (chapter 4.3). Setting DIP 4 to OFF during a takeover does nothing
 > until the next reset. Pulling the module, using the web interface, or resetting are the ways
 > out.
 
@@ -487,7 +491,7 @@ Keep in mind:
 
 - **The module has to be awake at power on** (S9-DIP1 ON). In deep sleep it does not answer, and
   SternFA takes the SD card after 3 seconds.
-- **Option DIP 5 plays no part here.** It only permits the takeover (9.1); loading the game
+- **Option DIP 4 plays no part here.** It only permits the takeover (9.1); loading the game
   through the module works without it.
 - **The nvram stays in the board's FRAM**, exactly as with an SD card boot. Credits and high
   scores belong to the game number, not to where the rom came from.
@@ -550,7 +554,8 @@ If you know the older boards, this is the short list:
   the two multiplexers U1 and U2 that hand the two DIP return lines over to the module after
   boot. This is what makes chapter 9 possible - and what makes chapter 4.3 a physical fact
   rather than a convention.
-- **Option DIP 5 now has a function** (FA-Control permission). It was unused before.
+- **Option DIP 4 is the FA-Control permission**, and anti flicker moved to DIP 5 (from 5.06,
+  on all boards). Up to 5.05 it was the other way round.
 - **Game roms can come from the ESP32** (from 5.0.6, chapter 9.7), so the SD card is no longer
   required.
 - **Two pull-up resistors on the DIP return lines are missing on PCB v2.00** and have to be
@@ -558,7 +563,7 @@ If you know the older boards, this is the short list:
 - **The unused SB_IRQ input** is still routed on the board but is not evaluated, as before.
 
 Everything that mattered to the player is unchanged: same connectors, same mounting holes, same
-game list, same SD card image, same options 1 to 4 and 6.
+game list, same SD card image, same options 1 to 3 and 6 - option 4 (anti flicker) now sits on DIP 5.
 
 ## 13. Not implemented yet, and known limitations
 
@@ -583,8 +588,10 @@ game list, same SD card image, same options 1 to 4 and 6.
 - **The option DIP is not an emergency stop during a takeover** - see 9.3.
 - **SW3 on the FPGA board does nothing.** It is wired to the FPGA and reserved; no software
   version has used it so far. The self test is on S6 'Bally Test' and in the coin door.
-- **Option DIP 5 changed meaning.** On the older boards it was documented as 'not used'. If you
-  move a board from an older manual's settings, check that switch.
+- **Option DIP 4 and 5 changed meaning.** Up to 5.05 (and in all older manuals) DIP 4 was anti
+  flicker and DIP 5 unused or the FA-Control permission. Since 5.06 DIP 4 is the FA-Control
+  permission and DIP 5 anti flicker. If you move a board from an older manual's settings, check
+  both switches.
 
 ---
 
@@ -843,8 +850,8 @@ binary with S1 as the lowest bit, see 4.1.
   1  + 1                                1  zero cross emulator
   2  + 2                                2  save nvram continuously
   3  + 4                                3  force Bally clock
-  4  + 8                                4  anti flicker for LEDs
-  5  + 16                               5  allow FA-Control to take over
+  4  + 8                                4  allow FA-Control to take over
+  5  + 16                               5  anti flicker for LEDs
   6  + 32                               6  init nvram at boot
   7  + 64
   8  + 128                             default: all OFF

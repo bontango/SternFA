@@ -17,3 +17,10 @@
 2026-09-19 11:27  version .0.6
   SW .0.6 - nur HW 2.0: Spiel-ROM vom ESP32 statt von der SD-Karte. rtl\fa_control\esp_rom_loader.vhd fragt nach dem DIP-Lesen bis zu 3 s beim ESP32-Modul (FA-Control ab 1.21, Menue 08 GAME ROMS) nach dem gewaehlten Spiel; liegt es dort, kommen 8 KB + CRC16 ueber die UART, die SD-Karte wird nicht gelesen, Statusziffer 3. Sonst wie bisher von SD. FA-Control meldet bei Opcode 8 jetzt die volle dreistellige Spielnummer (vorher nur die Einerstelle). Fuer HW 1.0/1.1 aendert .0.6 nichts, daher kein 106/306/406. AM SCHREIBTISCH GETESTET (19.09.2026), IM AUTOMATEN NOCH NICHT. PCB v2.00 braucht weiterhin die zwei nachgeruesteten Pull-ups an GS_Dips/Opt_Dips, sonst liest sie keinen DIP. Faellt im Geraet etwas auf: zurueck auf SternFA_505.jic.
   hw2_0_dev_open       5.0.6    SternFA_506.jic  sha256:4117A4C47BCBAF2C
+
+2026-09-19 11:48  version .0.6
+  SW .0.6 (Neubau, ersetzt 506 vom 19.09. 11:27) - Options-DIP 4 und 5 auf ALLEN Boards getauscht: FA-Control-Freigabe jetzt S2-Dip4 wie bei AtariFA (passt zur Meldung "DIP 4" im Webinterface), Anti-Flicker jetzt S2-Dip5 (bis x.05 und im ersten 506 Dip4). Wer Anti-Flicker nutzt, muss den Schalter von 4 auf 5 umlegen; das Handbuch v1.04 fuer HW 1.x nennt noch Dip4. Fuer HW 1.0/1.1 ist das die einzige Aenderung gegenueber x.05 (ESP-ROM-Lader und FA-Control gibt es dort nicht), daher jetzt auch 106/306/406. HW 2.0 enthaelt ausserdem das Spiel-ROM vom ESP32 (siehe Eintrag davor). NICHT AN HARDWARE GETESTET: der erste 506 lief am Schreibtisch, dieser Neubau und 106/306/406 noch nirgends.
+  hw1_0_cyclone_IV     1.0.6    SternFA_106.jic  sha256:446F5D2932F8A92A
+  hw1_1_cyclone_10     4.0.6    SternFA_406.jic  sha256:41B7BEAB0BF2935B
+  hw1_1_cyclone_IV     3.0.6    SternFA_306.jic  sha256:1E41E2DE371F3E9A
+  hw2_0_dev_open       5.0.6    SternFA_506.jic  sha256:2364A1B9E2EE2FD6

@@ -17,8 +17,8 @@
 --   Dip1    U11_PB6  (7)      game_option(1) zero cross emulator
 --   Dip2    U11_PB1  (0)      game_option(2) nvram -> FRAM
 --   Dip3    U11_PB0  (1)      game_option(3) force Bally
---   Dip4    U10_CB2  (2)      game_option(4) anti flicker
---   Dip5    U11_PB4  (3)      game_option(5) FA-Control permission
+--   Dip4    U10_CB2  (2)      game_option(4) FA-Control permission (HW 2.0; .0.6 on)
+--   Dip5    U11_PB4  (3)      game_option(5) anti flicker          (was Dip4 before)
 --   Dip6    U11_CB2  (4)      game_option(6) nvram init
 --
 -- game_select has the same range in both places and needs none of this: switch n of

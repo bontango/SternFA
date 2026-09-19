@@ -34,12 +34,11 @@
 --                         Bei AtariFA ist das GPIO10 des ESP32-C3 an FPGA-PIN_11,
 --                         active low, mit Weak-Pull-Up im FPGA: kein Host gesteckt
 --                         = high = keine Anforderung.
---   * ctrl_allow= '1'  -- Freigabe durch den Betreiber. Die DIP-Nummer ist je Projekt
---                         verschieden: AtariFA Options-DIP 4, SternFA Options-DIP 5
---                         (S2/S7-Dip5, im Top-Level not game_option(5); Handbuch
---                         Kapitel 4.2.5 und 9.1). ACHTUNG: die Meldung, die der
---                         Betreiber in FA-Control zu sehen bekommt, nennt weiterhin
---                         DIP 4 - der Text steht in der ESP32-Firmware, nicht hier.
+--   * ctrl_allow= '1'  -- Freigabe durch den Betreiber. AtariFA und SternFA nutzen
+--                         beide Options-DIP 4 (SternFA: S2-Dip4, im Top-Level
+--                         not game_option(4), seit .0.6; vorher Dip5). Die Meldung in
+--                         FA-Control nennt DIP 4 - der Text steht in der
+--                         ESP32-Firmware, nicht hier, und passt damit zu beiden.
 -- Erst der Opcode 100 (LISY_INIT) schaltet dann ctrl_active auf '1'. Die Antwort auf
 -- 100 sagt dem Host, woran es lag:
 --      0 = Kontrolle gewaehrt
