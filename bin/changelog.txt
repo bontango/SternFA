@@ -13,3 +13,7 @@
   hw1_1_cyclone_10     4.0.5    SternFA_405.jic  sha256:10F4D41DD3CEE834
   hw1_1_cyclone_IV     3.0.5    SternFA_305.jic  sha256:C6C457F4412DCBF7
   hw2_0_dev_open       5.0.5    SternFA_505.jic  sha256:3359C038ADE97E95
+
+2026-09-19 11:27  version .0.6
+  SW .0.6 - nur HW 2.0: Spiel-ROM vom ESP32 statt von der SD-Karte. rtl\fa_control\esp_rom_loader.vhd fragt nach dem DIP-Lesen bis zu 3 s beim ESP32-Modul (FA-Control ab 1.21, Menue 08 GAME ROMS) nach dem gewaehlten Spiel; liegt es dort, kommen 8 KB + CRC16 ueber die UART, die SD-Karte wird nicht gelesen, Statusziffer 3. Sonst wie bisher von SD. FA-Control meldet bei Opcode 8 jetzt die volle dreistellige Spielnummer (vorher nur die Einerstelle). Fuer HW 1.0/1.1 aendert .0.6 nichts, daher kein 106/306/406. AM SCHREIBTISCH GETESTET (19.09.2026), IM AUTOMATEN NOCH NICHT. PCB v2.00 braucht weiterhin die zwei nachgeruesteten Pull-ups an GS_Dips/Opt_Dips, sonst liest sie keinen DIP. Faellt im Geraet etwas auf: zurueck auf SternFA_505.jic.
+  hw2_0_dev_open       5.0.6    SternFA_506.jic  sha256:4117A4C47BCBAF2C

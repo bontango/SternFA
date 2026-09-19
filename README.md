@@ -37,7 +37,7 @@ three constants, and which folder the memory and PLL megafunctions come out of.
 | `hw1_0_cyclone_IV` | SternFA v1.00 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 1.0.5 | last release actually on this board: 1.0.3 |
 | `hw1_1_cyclone_IV` | SternFA v1.10 | Cyclone IV v4 piggy-back | EP4CE6E22C8 | 3.0.5 | last release actually on this board: 3.0.4 |
 | `hw1_1_cyclone_10` | SternFA v1.10 | Cyclone 10 piggy-back | 10CL006YE144C8G | 4.0.5 | lead variant; last release actually on this board: 4.0.4c |
-| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.5 | **prototype, never on a machine** — see chapter 4 |
+| `hw2_0_dev_open` | SternFA v2.00 | 'dev_open' board with Cyclone IV | EP4CE6E22C8 | 5.0.6 | **prototype**, 5.0.6 bench tested, never in a machine; PCB v2.00 needs two pull-ups — see chapter 4 |
 
 ### Version numbering
 
@@ -119,9 +119,25 @@ Game ROMs and the SD card image are not part of this tree.
 
 ## FA-Control on hardware 2.0
 
-**Fully integrated in the source, builds and fits with room to spare — but it has never
-run on a real machine.** `bin/hardware v2.0/dev_open/SternFA_505.jic` is the first
-bitstream for this board at all, and it has not been flashed.
+**Fully integrated in the source and tested on the bench — but it has never run in a real
+machine.** `bin/hardware v2.0/dev_open/SternFA_506.jic` (19.09.2026) is bit-identical to
+the bitstream that was bench tested: boot display, DIP read, connect, board report, hand
+back, watchdog and the game ROM from the ESP32 work there.
+
+**PCB v2.00 needs a rework.** `GS_Dips` and `Opt_Dips` have no pull-up: on v1.x the
+FPGA's internal one did it, on v2.0 the multiplexers U1/U2 put it on the wrong side.
+Without it the board reads no DIP at all (game 255, SD error). Fit 10 kΩ from each line
+to +3V; from PCB v2.01 on they are part of the assembly.
+
+### Game ROM from the ESP32 (.0.6)
+
+After reading the DIPs, `rtl/fa_control/esp_rom_loader.vhd` asks the module for the
+selected game, for up to 3 s. If FA-Control (1.21 or newer) holds it, 8 KB plus CRC16
+come over the UART and are written through the same path the SD card uses; the card is
+not touched and the status digit shows `3`. Otherwise — no module, no ROM, no answer,
+bad CRC — the boot continues from the SD card as before. This is deliberately not a
+LISY opcode. Since .0.6 the board also reports the full three-digit game number to
+FA-Control (opcode 8), so name files and ROMs share the key `SternFA/012`.
 
 `rtl/fa_control/` is a LISY slave for an *ESP32-C3 Super Mini* in socket X7. The module
 runs [FA-Control](https://github.com/bontango/FA_Control) and serves a test interface in
@@ -173,22 +189,22 @@ a dead bus.
 
 ### What is still open
 
-- **Never run on a machine.** When you try it, check in this order: does the web
-  interface connect and report `SternFA / 5.0.5` with 60/19/40/5 — do the displays show
-  what you type — does a single lamp light the lamp you asked for — does a coil pulse
-  the right coil. A lamp or coil off by a group is a mapping detail, fixable in one
-  place.
+- **Never run in a machine.** On the bench the web interface connects and reports
+  `SternFA / 5.0.6` with 60/19/40/5, and hand back and watchdog work. Still to check, in
+  this order: do the displays show what you type — does a single lamp light the lamp you
+  asked for — does a coil pulse the right coil. A lamp or coil off by a group is a
+  mapping detail, fixable in one place.
 - **Digit order** — the `fa_disp_map` process at the end of `top/SternFA.vhd` is marked
   `HW-TUNABLE`; if the display comes out reversed on the prototype, that block is where
   to fix it.
-- **The first binary exists but is untested.** `SternFA_505.jic` (08.09.2026) is the
-  first bitstream for HW 2.0 at all. Treat the first takeover as an experiment, on the
-  bench, with a machine you can afford to switch off.
+- **Bench tested only.** `SternFA_506.jic` has not been in a machine yet. Treat the
+  first takeover there as an experiment, with a machine you can afford to switch off;
+  if anything misbehaves, `SternFA_505.jic` is the fallback (no ROM from the ESP32).
 - **A board with both `HAS_DISP_LA_STR` and `HAS_ESP32`** would take control of lamps,
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
-Chapter 9 of `docs/SternFA_user_manual_v2.04.md` describes all of this for the operator.
+Chapter 9 of `docs/SternFA_user_manual_v2.06.md` (German: `docs/SternFA_Bedienungsanleitung_v2.06.md`) describes all of this for the operator.
 
 ## The CPU clock, and why .0.5 exists
 

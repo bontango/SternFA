@@ -4,18 +4,18 @@
 
 **Hardware-Version 2.0**
 
-**Software-Version 5.04**
+**Software-Version 5.06**
 
 **Bedienungsanleitung**
 
 ralf@lisy.dev
 
-v1.0 19.08.2026
+v1.1 19.09.2026
 
-> Deutsche Fassung von `SternFA_user manual_v2.04.md`. Die Kapitelnummern sind in beiden
+> Deutsche Fassung von `SternFA_user manual_v2.06.md`. Die Kapitelnummern sind in beiden
 > Fassungen gleich.
 >
-> Diese Anleitung beschreibt **Hardware-Version 2.0** mit Software **5.04**. Für die älteren
+> Diese Anleitung beschreibt **Hardware-Version 2.0** mit Software **5.06**. Für die älteren
 > Platinen (HW 1.0 und HW 1.1) gilt weiterhin `SternFA_user manual_v1.04.pdf`. Was sich
 > zwischen den beiden Platinengenerationen geändert hat, steht in Kapitel 12.
 
@@ -93,8 +93,10 @@ Bauteile kaufen, lässt sich Ihre Stern-Ersatz-MPU für unter 80 aufbauen.
 - **Alle DIP-Schalter werden einmal beim Start gelesen.** Einen Schalter im laufenden Betrieb
   umzulegen bewirkt nichts — und bei Hardware 2.0 ist das keine Konvention, sondern eine
   physikalische Tatsache, siehe Kapitel 4.3.
-- **Die Platine braucht ihre SD-Karte.** Die Spiel-ROMs stecken nicht im FPGA, sie werden bei
-  jedem Einschalten von der Karte gelesen. Keine Karte, kein Spiel.
+- **Die Platine braucht ihre SD-Karte** — es sei denn, das Spiel-ROM liegt auf dem ESP32-Modul
+  (Kapitel 9.7). Die Spiel-ROMs stecken nicht im FPGA, sie werden bei jedem Einschalten gelesen:
+  vom Modul, wenn es das gewählte Spiel hat, sonst von der Karte. Keine Karte und kein ROM auf
+  dem Modul, kein Spiel.
 - **Die beim Start angezeigte Version beginnt auf dieser Platine mit einer `5`.** Diese Ziffer
   kennzeichnet die Platinenvariante — siehe Kapitel 11. Steht dort keine 5, liegt das falsche
   Programm im FPGA.
@@ -258,7 +260,7 @@ Spielcode läuft. Sie steht so lange, wie die grüne LED die ersten Male blinkt:
 
 | Anzeige | zeigt |
 |---|---|
-| **Spieler 1** | die Version des laufenden FPGA-Programms, z. B. `5 0 4`. Die erste Ziffer ist die Platinenvariante (Kapitel 11) |
+| **Spieler 1** | die Version des laufenden FPGA-Programms, z. B. `5 0 6`. Die erste Ziffer ist die Platinenvariante (Kapitel 11) |
 | **Spieler 2** | die an S1 gewählte Spielnummer, rechtsbündig. Eine führende `2` ganz links bedeutet, dass ein Stern-MPU-200-Spiel gewählt ist |
 | **Spieler 3** | `050963` — die lisy.dev-Kennung für FPGA-basierte MPUs. Sie ist fest und sagt nur, dass der Displaypfad funktioniert |
 | **Spieler 4** | den Wert der Optionsbank S2 als Zahl, 0 bis 63: Dip1 = 1, Dip2 = 2, Dip3 = 4, Dip4 = 8, Dip5 = 16, Dip6 = 32 |
@@ -320,7 +322,7 @@ dauerhaft** — der Prozessor steht dann, sie kann also nichts anderes bedeuten.
 | **S6 „Bally Test"** | auf der SternFA-Platine | parallel zum Selbsttestschalter in der Münztür geschaltet. Bringt das Spiel in seinen Selbsttest, sodass sich Schalter-, Lampen-, Spulen- und Displaytests auch ohne Münztür auf der Werkbank durchlaufen lassen |
 | **S33** | auf der SternFA-Platine | der S33-Bookkeeping-Reset der Original-MPU (er löst den NMI aus). Gleiche Funktion wie auf der Originalplatine |
 | **S8 „Test"** | neben Steckplatz X7 | gehört zum ESP32-C3, nicht zum FPGA. Siehe 9.6 |
-| **SW3** | auf der FPGA-Platine | **ohne Funktion in Software 5.04.** Der Taster liegt am FPGA, wird aber nicht ausgewertet — siehe Kapitel 13 |
+| **SW3** | auf der FPGA-Platine | **ohne Funktion in Software 5.06.** Der Taster liegt am FPGA, wird aber nicht ausgewertet — siehe Kapitel 13 |
 
 ## 7. Die SD-Karte
 
@@ -368,9 +370,11 @@ Das ist ein **Werkzeug für die Werkbank und die Fehlersuche**, kein Zubehör f�
 Spielbetrieb. Wer nichts in X7 einsteckt, merkt von dieser Schnittstelle nichts — die Platine
 verhält sich exakt so wie ohne.
 
-> **Diese Funktion ist noch an keinem Automaten erprobt.** Sie ist neu in Software 5.04.
-> Behandeln Sie die erste Übernahme als Versuch: auf der Werkbank, mit einem Automaten, den Sie
-> notfalls ausschalten können. Kapitel 13 sagt, worauf zuerst zu schauen ist.
+> **Diese Funktion ist auf der Werkbank erprobt, aber noch nicht in einem Automaten.** Sie ist
+> neu in Software 5.04; mit 5.06 haben Verbinden, die Meldung der Platine, die Rückgabe und der
+> Watchdog auf der Werkbank funktioniert. Behandeln Sie die erste Übernahme im Automaten als
+> Versuch, mit einem Automaten, den Sie notfalls ausschalten können. Kapitel 13 sagt, worauf
+> zuerst zu schauen ist.
 
 ### 9.1. Die Freigabe: Options-DIP 5
 
@@ -423,7 +427,7 @@ nichts von Hand eingetragen werden. Bei SternFA kommt zurück:
 | | |
 |---|---|
 | Kennung | `SternFA` |
-| Software-Version | dieselbe wie auf der Info-Anzeige, z. B. `5.0.4` |
+| Software-Version | dieselbe wie auf der Info-Anzeige, z. B. `5.0.6` |
 | Lampen | 60 |
 | Spulen | 19 |
 | Schalter | 40 |
@@ -525,7 +529,7 @@ Das FPGA-Programm selbst und das SD-Karten-Image liegen im SternFA-Software-Repo
 > **<https://lisy.dev/swrep/SternFA>**
 
 **Achten Sie darauf, die Version für Ihre Platine zu nehmen** — siehe Kapitel 11. Für Hardware
-2.0 ist das die Datei, deren Name mit `SternFA_5` beginnt, zum Beispiel `SternFA_504.jic`.
+2.0 ist das die Datei, deren Name mit `SternFA_5` beginnt, zum Beispiel `SternFA_506.jic`.
 
 Das FPGA auf dieser Platine wird aus einem seriellen Konfigurationsbaustein geladen; das
 Programm bleibt also nach dem Ausschalten erhalten. Sie programmieren es einmal, nicht bei jedem
@@ -564,6 +568,8 @@ Wer die älteren Platinen kennt, für den ist das die Kurzfassung:
 - **Options-DIP 5 hat jetzt eine Funktion** (FA-Control-Freigabe). Vorher war er unbenutzt.
 - **Spiel-ROMs können vom ESP32 kommen** (ab 5.0.6, Kapitel 9.7). Die SD-Karte ist dann
   nicht mehr nötig.
+- **Auf PCB v2.00 fehlen zwei Pull-up-Widerstände an den DIP-Rückleitungen**; sie müssen von
+  Hand nachgerüstet werden (Kapitel 13). Ab v2.01 sind sie bestückt.
 - **Der unbenutzte SB_IRQ-Eingang** ist weiterhin auf der Platine geführt, wird aber wie bisher
   nicht ausgewertet.
 
@@ -573,15 +579,25 @@ und 6.
 
 ## 13. Noch nicht umgesetzt, und bekannte Grenzen
 
-- **FA-Control ist noch nie an einem Automaten gelaufen.** Software 5.04 ist die erste Version
-  damit. Wenn Sie es ausprobieren, prüfen Sie in dieser Reihenfolge: verbindet sich die
-  Weboberfläche und zeigt `SternFA / 5.0.4` mit 60 Lampen, 19 Spulen, 40 Schaltern, 5 Displays
-  — zeigen die Displays, was Sie eintippen — leuchtet bei einer einzelnen Lampe die Lampe, die
+- **PCB v2.00 braucht zwei zusätzliche Pull-up-Widerstände.** Die Rückleitungen der beiden
+  DIP-Bänke (`GS_Dips` und `Opt_Dips`) haben auf dieser Platine keinen Pull-up: auf v1.x
+  übernahm das der interne Pull-up des FPGA, auf v2.0 sitzen aber die Multiplexer U1/U2 zwischen
+  den DIP-Bänken und dem FPGA, und der interne Pull-up landet auf der falschen Seite. Ohne die
+  beiden Widerstände liest die Platine keinen einzigen DIP-Schalter — die Info-Anzeige zeigt
+  Spiel 255, und der Start bleibt mit einem SD-Karten-Fehler stehen. Je einen 10-kOhm-Widerstand
+  von jeder der beiden Leitungen nach +3V (3,3 V) einlöten. Ab PCB v2.01 gehören sie zur
+  Bestückung.
+- **FA-Control ist auf der Werkbank gelaufen, aber noch nicht in einem Automaten.** Software 5.04
+  war die erste Version damit; mit 5.06 verbindet sich die Weboberfläche und zeigt
+  `SternFA / 5.0.6` mit 60 Lampen, 19 Spulen, 40 Schaltern, 5 Displays, die Rückgabe startet das
+  Spiel neu, und das Ziehen des Moduls fällt über den Watchdog zurück. Noch offen, in dieser
+  Reihenfolge: zeigen die Displays, was Sie eintippen — leuchtet bei einer einzelnen Lampe die Lampe, die
   Sie gemeint haben — pulst bei einer Spule die richtige Spule. Ist eine Lampe oder eine Spule
   um eine Gruppe verschoben, ist das eine Frage der Zuordnung und an genau einer Stelle zu
   beheben; melden Sie in dem Fall, was Sie gesehen haben.
 - **Ton lässt sich über FA-Control nicht ansteuern** — siehe 9.4.
-- **Das Laden des Spiel-ROMs vom ESP32 ist noch nicht an Hardware erprobt** (neu in 5.0.6).
+- **Das Laden des Spiel-ROMs vom ESP32 ist auf der Werkbank erprobt, aber noch nicht in einem
+  Automaten** (neu in 5.0.6).
   Kommt statt der `3` in der Statusanzeige keine Ziffer, wurde doch die SD-Karte gelesen; im
   Menü 08 steht dann, was das Modul zuletzt geantwortet hat.
 - **Der Options-DIP ist während einer Übernahme kein Not-Aus** — siehe 9.3.
@@ -868,7 +884,7 @@ siebenstellige Anzeigen, `Special` = Sonderfassung.
 **Die Info-Anzeige, erste Sekunden nach dem Einschalten**
 
 ```
-Spieler 1     5 0 4     Version, erste Ziffer = Platinenvariante (Kapitel 11)
+Spieler 1     5 0 6     Version, erste Ziffer = Platinenvariante (Kapitel 11)
 Spieler 2  2    1 0 1   Spielauswahl; führende 2 = Stern-MPU-200-Takt
 Spieler 3  0 5 0 9 6 3  lisy.dev-Kennung, fest
 Spieler 4       3 2     Wert der Optionsbank S2 (Dip1=1 ... Dip6=32)

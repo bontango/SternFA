@@ -4,19 +4,19 @@
 
 **Hardware version 2.0**
 
-**Software version 5.04**
+**Software version 5.06**
 
 **user manual**
 
 ralf@lisy.dev
 
-v1.0 19.08.2026
+v1.1 19.09.2026
 
-> Eine deutsche Fassung gibt es unter `SternFA_Bedienungsanleitung_v2.04.md`.
-> A German version is available as `SternFA_Bedienungsanleitung_v2.04.md`. The chapter
+> Eine deutsche Fassung gibt es unter `SternFA_Bedienungsanleitung_v2.06.md`.
+> A German version is available as `SternFA_Bedienungsanleitung_v2.06.md`. The chapter
 > numbering is the same in both.
 >
-> This manual describes **hardware version 2.0** with software **5.04**. For the older
+> This manual describes **hardware version 2.0** with software **5.06**. For the older
 > boards (HW 1.0 and HW 1.1) the manual `SternFA_user manual_v1.04.pdf` still applies.
 > What changed between the two board generations is listed in chapter 12.
 
@@ -94,8 +94,9 @@ components it is possible to build your Stern replacement MPU for less than 80.
 - **All DIP switches are read once, during boot.** Changing one while the game runs has no
   effect at all - and on hardware 2.0 that is not a convention but a physical fact, see
   chapter 4.3.
-- **The board needs its SD card.** The game roms are not in the FPGA; they are read from the
-  card at every power-up. No card, no game.
+- **The board needs its SD card** - unless the game rom sits on the ESP32 module (chapter 9.7).
+  The game roms are not in the FPGA; they are read at every power-up, from the module if it has
+  the selected game, otherwise from the card. No card and no rom on the module, no game.
 - **The version shown at boot starts with a `5` on this board.** That digit identifies the
   board variant - see chapter 11. If it does not say 5, you have the wrong program in the FPGA.
 
@@ -256,7 +257,7 @@ runs. It stays up for the first few blinks of the green LED:
 
 | Display | Shows |
 |---|---|
-| **Player 1** | version of the FPGA program running, e.g. `5 0 4`. The first digit is the board variant (chapter 11) |
+| **Player 1** | version of the FPGA program running, e.g. `5 0 6`. The first digit is the board variant (chapter 11) |
 | **Player 2** | the selected game number from S1, right aligned. A leading `2` on the far left means a Stern MPU-200 game was selected |
 | **Player 3** | `050963` - the lisy.dev identifier for FPGA based MPUs. It is fixed and only tells you that the display path works |
 | **Player 4** | the value of the option bank S2 as a number, 0 to 63: Dip1 = 1, Dip2 = 2, Dip3 = 4, Dip4 = 8, Dip5 = 16, Dip6 = 32 |
@@ -317,7 +318,7 @@ the CPU is stopped then, so it cannot mean anything else.
 | **S6 'Bally Test'** | on the SternFA PCB | wired in parallel to the self test switch in the coin door. Puts the game into its self test, so you can run switch, lamp, solenoid and display tests on the bench without a coin door |
 | **S33** | on the SternFA PCB | the S33 bookkeeping reset of the original MPU (it triggers the NMI). Same function as on the original board |
 | **S8 'Test'** | next to socket X7 | belongs to the ESP32-C3, not to the FPGA. See 9.6 |
-| **SW3** | on the FPGA board | **no function in software 5.04.** It is wired to the FPGA but not used - see chapter 13 |
+| **SW3** | on the FPGA board | **no function in software 5.06.** It is wired to the FPGA but not used - see chapter 13 |
 
 ## 7. The SD card
 
@@ -361,9 +362,10 @@ This is a **tool for the bench and for fault finding**, not an accessory for nor
 plug nothing into X7, you will never notice this interface - the board behaves exactly as it
 does without.
 
-> **This feature has not yet been tried on a real machine.** It is new in software 5.04. Treat
-> the first takeover as an experiment: do it on the bench, with the machine you can afford to
-> switch off. Chapter 13 lists what to look at first.
+> **This feature has been tried on the bench, but not yet in a real machine.** It is new in
+> software 5.04; with 5.06 connecting, the board report, handing control back and the watchdog
+> worked on the bench. Treat the first takeover in a machine as an experiment, with the machine
+> you can afford to switch off. Chapter 13 lists what to look at first.
 
 ### 9.1. The permission: option DIP 5
 
@@ -414,7 +416,7 @@ to be typed in. SternFA answers:
 | | |
 |---|---|
 | Identification | `SternFA` |
-| Software version | the same one the info display shows, e.g. `5.0.4` |
+| Software version | the same one the info display shows, e.g. `5.0.6` |
 | Lamps | 60 |
 | Solenoids | 19 |
 | Switches | 40 |
@@ -513,7 +515,7 @@ The FPGA program itself and the SD card image are in the SternFA software reposi
 > **<https://lisy.dev/swrep/SternFA>**
 
 **Make sure you take the version for your board** - see chapter 11. For hardware 2.0 that is the
-file whose name starts with `SternFA_5`, for example `SternFA_504.jic`.
+file whose name starts with `SternFA_5`, for example `SternFA_506.jic`.
 
 The FPGA on this board is configured from a serial configuration device, so the program stays in
 place after a power cycle. You program it once, not at every start.
@@ -551,6 +553,8 @@ If you know the older boards, this is the short list:
 - **Option DIP 5 now has a function** (FA-Control permission). It was unused before.
 - **Game roms can come from the ESP32** (from 5.0.6, chapter 9.7), so the SD card is no longer
   required.
+- **Two pull-up resistors on the DIP return lines are missing on PCB v2.00** and have to be
+  added by hand (chapter 13). From v2.01 on they are fitted.
 - **The unused SB_IRQ input** is still routed on the board but is not evaluated, as before.
 
 Everything that mattered to the player is unchanged: same connectors, same mounting holes, same
@@ -558,16 +562,24 @@ game list, same SD card image, same options 1 to 4 and 6.
 
 ## 13. Not implemented yet, and known limitations
 
-- **FA-Control has never run on a machine.** Software 5.04 is the first version with it. When
-  you try it, check in this order: does the web interface connect and show `SternFA / 5.0.4`
-  with 60 lamps, 19 coils, 40 switches, 5 displays - do the displays show what you type - does
-  a single lamp light the lamp you asked for - does a coil pulse the right coil. If a lamp or a
-  coil is off by a group, that is a mapping detail and it is fixable in one place; report what
-  you saw.
+- **PCB v2.00 needs two extra pull-up resistors.** The return lines of the two DIP banks
+  (`GS_Dips` and `Opt_Dips`) have no pull-up on this board: on v1.x the FPGA's internal pull-up
+  did the job, but on v2.0 the multiplexers U1/U2 sit between the DIP banks and the FPGA, and
+  the internal pull-up ends up on the wrong side. Without the two resistors the board reads no
+  DIP switch at all - the info display shows game 255 and the boot stops with an SD card error.
+  Fit a 10 kOhm resistor from each of the two lines to +3V (3.3 V). From PCB v2.01 on they are part of
+  the assembly.
+- **FA-Control has run on the bench, not yet in a machine.** Software 5.04 was the first version
+  with it; with 5.06 the web interface connects and shows `SternFA / 5.0.6` with 60 lamps,
+  19 coils, 40 switches, 5 displays, handing control back restarts the game and pulling the
+  module falls back through the watchdog. Still open, in this order: do the displays show what
+  you type - does a single lamp light the lamp you asked for - does a coil pulse the right coil.
+  If a lamp or a coil is off by a group, that is a mapping detail and it is fixable in one place;
+  report what you saw.
 - **Sound cannot be driven by FA-Control** - see 9.4.
-- **Loading the game rom from the ESP32 has not been tried on hardware yet** (new in 5.0.6). If
-  the status display shows no digit instead of `3`, the SD card was read after all; menu 08 then
-  shows what the module answered last.
+- **Loading the game rom from the ESP32 has been tried on the bench, not yet in a machine**
+  (new in 5.0.6). If the status display shows no digit instead of `3`, the SD card was read
+  after all; menu 08 then shows what the module answered last.
 - **The option DIP is not an emergency stop during a takeover** - see 9.3.
 - **SW3 on the FPGA board does nothing.** It is wired to the FPGA and reserved; no software
   version has used it so far. The self test is on S6 'Bally Test' and in the coin door.
@@ -845,7 +857,7 @@ binary with S1 as the lowest bit, see 4.1.
 **The info display, first seconds after power on**
 
 ```
-Player 1      5 0 4     version, first digit = board variant (chapter 11)
+Player 1      5 0 6     version, first digit = board variant (chapter 11)
 Player 2   2    1 0 1    game select; leading 2 = Stern MPU-200 clock
 Player 3   0 5 0 9 6 3   lisy.dev identifier, fixed
 Player 4        3 2      value of the option bank S2 (Dip1=1 ... Dip6=32)
