@@ -303,7 +303,10 @@ normale Release-Datei `SternFA_<Version>.jic` enthält aus Urheberrechtsgründen
 ohne Karte endet der Start dann mit Ziffer `8`, und die rote LED blinkt achtmal schnell, gefolgt
 von einer Pause. Die Spiele kommen mit einer lokal erzeugten Datei `SternFA_<Version>_roms.jic`
 (Bitstream und alle Spiele der SD-Karte v098) in den Flash. Eine Karte mit CRC-Fehler (Ziffer `2`)
-wird nicht durch den Flash ersetzt, sondern bleibt ein Fehler.
+wird nicht durch den Flash ersetzt, sondern bleibt ein Fehler. Auf Hardware 2.x gilt das ab
+Platine v2.02 bzw. einer entsprechend umgebauten v2.00/v2.01 (Firmware 5.3.0, Reihenfolge
+ESP32 → SD-Karte → Flash). Ein nicht umgebautes v2.00/v2.01 verliert mit 5.3.0 das ESP32-Modul
+und bleibt deshalb bei 5.0.6.
 
 ### 5.4. Phase 3: das Spiel läuft an
 

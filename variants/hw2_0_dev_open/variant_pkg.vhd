@@ -22,7 +22,7 @@ package variant_pkg is
 	constant HAS_DISP_LA_STR : boolean := false;
 
 	-- ESP32-C3 socket X7 and everything that hangs off it.
-	-- Socket X7 for an ESP32-C3 Super Mini, the two 74LVC1G157 multiplexers U1/U2 that hand the DIP return lines over to it after boot, and ESP32_ser_rx on PIN_11. This is what turns SOL_EN into the mux select (hence not boot_phase(1) instead of boot_phase(0)) and what builds the FA-Control slave.
+	-- Socket X7 for an ESP32-C3 Super Mini, the two 74LVC1G157 multiplexers U1/U2 that hand the DIP return lines over to it after boot, and ESP32_ser_rx on PIN_119 (PIN_11 up to PCB v2.01, see pins.tcl). This is what turns SOL_EN into the mux select (hence not boot_phase(1) instead of boot_phase(0)) and what builds the FA-Control slave.
 	constant HAS_ESP32 : boolean := true;
 
 end package variant_pkg;

@@ -298,7 +298,9 @@ The regular release file `SternFA_<version>.jic` carries **no** games, for copyr
 without a card the boot then ends with digit `8`, and the red LED blinks eight times quickly,
 then pauses. The games get into the flash with a locally built `SternFA_<version>_roms.jic`
 (bitstream plus every game of SD card v098). A card with a CRC error (digit `2`) is not replaced
-by the flash, it stays an error.
+by the flash, it stays an error. On hardware 2.x this needs PCB v2.02 or a v2.00/v2.01
+rewired the same way (firmware 5.3.0, order ESP32 → SD card → flash). An unmodified v2.00/v2.01
+loses the ESP32 module with 5.3.0 and stays on 5.0.6.
 
 ### 5.4. Phase 3: program execution
 

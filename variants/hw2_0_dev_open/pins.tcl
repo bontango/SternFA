@@ -44,7 +44,7 @@ set_location_assignment PIN_39 -to CS_SD
 set_location_assignment PIN_43 -to CS_FRAM
 set_location_assignment PIN_69 -to GS_DIPS
 set_location_assignment PIN_71 -to OPT_DIPS
-set_location_assignment PIN_11 -to ESP32_ser_rx
+set_location_assignment PIN_119 -to ESP32_ser_rx
 set_location_assignment PIN_80 -to ZERO_CROSS
 set_location_assignment PIN_42 -to DISP_BLANKING
 set_location_assignment PIN_86 -to S33
@@ -102,7 +102,7 @@ set_location_assignment PIN_110 -to SB_in_D[4]
 set_location_assignment PIN_23 -to SB_in_D[5]
 set_location_assignment PIN_105 -to SB_in_D[6]
 set_location_assignment PIN_103 -to SB_in_D[7]
-set_location_assignment PIN_119 -to SB_IRQ
+set_location_assignment PIN_11 -to SB_IRQ
 set_location_assignment PIN_3 -to SB_PHI2
 set_location_assignment PIN_1 -to SB_VMA
 set_location_assignment PIN_143 -to SB_Reset
@@ -116,3 +116,20 @@ set_location_assignment PIN_128 -to SB_A6
 set_location_assignment PIN_129 -to SB_A7
 set_location_assignment PIN_126 -to SB_A9
 set_location_assignment PIN_127 -to SB_A12
+
+# Configuration flash EPCS16 (x.30, rtl/common/Flash_ROM.vhd): the dedicated
+# configuration pins (~ALTERA_DCLK~ 12, ~ALTERA_DATA0~ 13, ~ALTERA_FLASH_nCE_nCSO~ 8,
+# ~ALTERA_ASDO_DATA1~ 6). Released as regular I/O in device.tcl.
+#
+# PCB v2.02 (and a v2.00 rewired the same way): ESP32_ser_rx and SB_IRQ have swapped
+# pins. On v2.00/v2.01 ESP32_ser_rx - an OUTPUT - sat on PIN_11, right next to DCLK, and
+# Quartus does not place DCLK as user I/O beside an output there (Error 169182, possible
+# switch coupling; minimum current and LVCMOS 2 mA did not help). An INPUT on PIN_11 is
+# fine (HW 1.x has SB_in_D[7] there). PIN_10, the only free pin, is no way out: on the
+# dev_open board PIN_10/PIN_11 go to its CH340E through 220 Ohm. SB_IRQ is read nowhere
+# in the design (SB_in_IRQ is not part of cpu_irq), so it takes PIN_11 and ESP32_ser_rx
+# gets its old PIN_119. An UNMODIFIED v2.00/v2.01 loses the ESP32 with this pinout.
+set_location_assignment PIN_12 -to FLASH_DCLK
+set_location_assignment PIN_8 -to FLASH_NCS
+set_location_assignment PIN_6 -to FLASH_ASDO
+set_location_assignment PIN_13 -to FLASH_DATA0

@@ -33,14 +33,18 @@
 --
 -- What changed with PCB v2.00 besides the ESP32 socket:
 --   S8 Reset moved to the on-board SW2, S9 Selftest to SW3, pull-up R101 dropped.
---   SB_IRQ/ is still routed on the board (FPGA pin 119) and still read nowhere -
---   SB_in_IRQ is not part of cpu_irq, exactly as on the older boards.
+--   SB_IRQ/ is still routed on the board and still read nowhere - SB_in_IRQ is not
+--   part of cpu_irq, exactly as on the older boards. PCB v2.02 swaps it with
+--   ESP32_ser_rx: SB_IRQ/ on FPGA pin 11 (was 119), ESP32_ser_rx on pin 119 (was 11),
+--   because an output next to DCLK keeps the configuration flash from being used
+--   (see below and variants/hw2_0_dev_open/pins.tcl).
 --
--- Configuration flash as second source of the game ROMs - x.30, PCB v1.x
+-- Configuration flash as second source of the game ROMs - x.30, every board
 --   The FPGA boards carry an EPCS16 on the dedicated configuration pins
---   (DCLK, nCSO, ASDO, DATA0), released as regular I/O after configuration. On PCB
---   v2.00 the FLASH ports are VIRTUAL_PIN: its ESP32_ser_rx output on PIN_11 sits next
---   to DCLK, and Quartus does not place DCLK as user I/O beside it. When no
+--   (DCLK, nCSO, ASDO, DATA0), released as regular I/O after configuration. HW 2.x
+--   only from PCB v2.02 on (or a v2.00/v2.01 rewired the same way): before, the
+--   ESP32_ser_rx output sat on pin 11 next to DCLK, and Quartus does not place DCLK as
+--   user I/O beside an output (Error 169182). When no
 --   SD card answers (SD_Card o_no_card) rtl/common/Flash_ROM.vhd loads the selected
 --   game from there: a directory plus every 2 KByte ROM chip only once, written by
 --   scripts/make_flash_hex.ps1 into a local *_roms.jic. The released .jic carries no
