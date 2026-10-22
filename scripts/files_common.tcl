@@ -39,6 +39,8 @@ set_global_assignment -name VHDL_FILE ../../rtl/common/byte_to_decimal.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/EEprom.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/one_pulse_only.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/SD_Card.vhd
+# x.30: game ROMs from the configuration flash when no SD card answers
+set_global_assignment -name VHDL_FILE ../../rtl/common/Flash_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/zc_indicator.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/SPI_Master.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/slow_to_fast_clock_bus.vhd

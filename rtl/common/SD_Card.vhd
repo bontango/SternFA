@@ -18,6 +18,10 @@
 -- each rom 64KByte (128 sectors ) expected
 -- crc check for first 32KB
 -- expected CRC at address 0xFFFE & 0xFFFF
+-- v2.1 new output o_no_card: '1' once the read has ended in error WITHOUT a crc error,
+--      i.e. no usable card (CMD0/CMD8/ACMD41). Starts the configuration flash as second
+--      ROM source (Flash_ROM.vhd). A crc error stays a card error - a card that is
+--      there but carries a bad image is not replaced by the flash. 10.2026
 
 
 library IEEE;
@@ -47,7 +51,8 @@ use IEEE.numeric_std.all;
 		-- start CPU
 		cpu_reset_l : out STD_LOGIC;
 		-- feedback
-		SDcard_error : out STD_LOGIC
+		SDcard_error : out STD_LOGIC;
+		o_no_card : out STD_LOGIC
 		);
     end SD_Card;
 	 
@@ -86,12 +91,17 @@ use IEEE.numeric_std.all;
 		signal do_not_enable_SS : std_LOGIC;	
 		signal sector : unsigned (15 downto 0);	
 		
-		signal byte_count : integer range 0 to 520; 		
+		signal crc_error_i : std_LOGIC;	-- crc_error, readable here (v2.1)
+		signal byte_count : integer range 0 to 520;		
 		
 		signal attempts : integer range 0 to 5000; 
 		signal counter  : integer range 0 to 100000000;   -- delay, for 10ms use 500.000
-	begin		
-		
+	begin
+
+		-- the read has ended in error and stays there (error blinks, then stop), see v2.1
+	o_no_card <= '1' when (state_A = error or state_A = stop) and crc_error_i = '0' else '0';
+	crc_error <= crc_error_i;
+
 		-- signals for the two SPI Master
 	o_SPI_MOSI <=	
 	MOSI_A when active_master = "01" else
@@ -176,7 +186,7 @@ SD_CARD_READ: entity work.SPI_Master --read i byte by byte (slooow)
 				address_sd_card <= (others => '0');
 				byte_count <= 0;
 				SDcard_error <= '1'; -- active low
-				crc_error <= '0';
+				crc_error_i <= '0';
 				counter <= 0;
 				attempts <= 0;
 				state_A <= Startdelay;    
@@ -368,7 +378,7 @@ SD_CARD_READ: entity work.SPI_Master --read i byte by byte (slooow)
 
 				when check_crc =>		
 					if ( calc_checksum /= read_checksum ) then
-						crc_error <= '1';
+						crc_error_i <= '1';
 						state_A <= error;
 					else
 						state_A <= all_done;

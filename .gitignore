@@ -44,6 +44,10 @@ CLAUDE.md
 PLAN_Zielstruktur.md
 VARIANTEN.md
 
+# Release files WITH the game ROMs in the configuration flash (x.30, release.ps1
+# -RomImage). Copyrighted - local only, never on GitHub.
+bin/**/*_roms.jic
+
 # Windows junk
 Thumbs.db
 desktop.ini

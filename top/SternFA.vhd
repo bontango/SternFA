@@ -36,6 +36,17 @@
 --   SB_IRQ/ is still routed on the board (FPGA pin 119) and still read nowhere -
 --   SB_in_IRQ is not part of cpu_irq, exactly as on the older boards.
 --
+-- Configuration flash as second source of the game ROMs - x.30, PCB v1.x
+--   The FPGA boards carry an EPCS16 on the dedicated configuration pins
+--   (DCLK, nCSO, ASDO, DATA0), released as regular I/O after configuration. On PCB
+--   v2.00 the FLASH ports are VIRTUAL_PIN: its ESP32_ser_rx output on PIN_11 sits next
+--   to DCLK, and Quartus does not place DCLK as user I/O beside it. When no
+--   SD card answers (SD_Card o_no_card) rtl/common/Flash_ROM.vhd loads the selected
+--   game from there: a directory plus every 2 KByte ROM chip only once, written by
+--   scripts/make_flash_hex.ps1 into a local *_roms.jic. The released .jic carries no
+--   ROMs; with it a boot without card ends in error 8. Status digit 4 = ROM from the
+--   flash, 8 = flash slot empty.
+--
 -- Pin assignment of every board: variants/<name>/pins.tcl, derived from
 --   docs/SternFA_110_SCH.PDF and docs/SternFA_200_Final_SCH.PDF (blocks DEV1a/DEV1b)
 -- ---------------------------------------------------------------------------
@@ -140,7 +151,14 @@ entity SternFA is
 		--            driven push-pull by the ESP. There is deliberately NO weak
 		--            pull-up in the FPGA on GS_DIPS/OPT_DIPS on v2.00 - the mux
 		--            outputs drive them actively; see variants/hw2_0_dev_open/pins.tcl.
-		ESP32_ser_rx	: out std_logic
+		ESP32_ser_rx	: out std_logic;
+
+		-- configuration flash EPCS16, second source of the game ROMs (Flash_ROM.vhd).
+		-- Dual purpose pins, released as regular I/O in variants/<name>/device.tcl.
+		FLASH_DCLK	: out std_logic;
+		FLASH_NCS	: out std_logic;
+		FLASH_ASDO	: out std_logic;	-- data into the flash
+		FLASH_DATA0	: in  std_logic	-- data out of the flash
 		);
 end;
 
@@ -225,7 +243,17 @@ signal data_sd_card	:  std_logic_vector(7 downto 0);
 signal wr_rom			:  std_logic;
 signal SDcard_error		:  std_logic;
 signal SDcard_MOSI	:	std_logic; 
-signal SDcard_CLK		:	std_logic; 
+signal SDcard_CLK		:	std_logic;
+signal sd_error		:  std_logic;	-- SD_Card's error LED, active low
+signal sd_no_card		:  std_logic;	-- SD_Card found no card: the flash takes over
+
+-- configuration flash (fl_), rtl/common/Flash_ROM.vhd
+signal fl_addr			:  std_logic_vector(15 downto 0);
+signal fl_data			:  std_logic_vector(7 downto 0);
+signal fl_wr			:  std_logic;
+signal fl_cpu_start	:  std_logic;	-- ROM is in from the flash
+signal fl_error		:  std_logic;	-- active low, error code 8
+signal fl_empty		:  std_logic;	-- selected slot is not in the flash
 
 -- EEprom we use 256Bytes
 signal address_eeprom	:  std_logic_vector(7 downto 0);
@@ -383,6 +411,8 @@ cpu_clk <= clk_1MHz when is_MPU200 = '1' else clk_500KHz;
 -- the CPU halted pia_U11_ca2_o would just freeze.
 LED_Status <= '0' when fa_ctrl_active = '1' else not pia_U11_ca2_o; -- Bally Green LED
 LED_SD_ERR <= SDcard_error;
+-- after a card that did not answer the flash loader owns the LED (error 8)
+SDcard_error <= fl_error when sd_no_card = '1' else sd_error;
 LED_ZC <= zc_indicator; -- zero cross indicator
 ----------------
 -- boot phases
@@ -403,7 +433,12 @@ port map(
 -- (sdcard_error is active low), 2 = SD crc error, 3 = ROM from the ESP32 (HW 2.0
 -- only). While the ESP path is taken SD_Card stays in reset and reports no error
 -- either; esp_rom_ok comes first all the same, so the source is always visible.
-crc_dig <= x"3" when esp_rom_ok = '1' else x"2" when crc_error = '1' else x"1" when sdcard_error = '0' else x"F";
+-- x.30: 4 = ROM from the configuration flash (no SD card), 8 = slot not in the flash.
+crc_dig <= x"3" when esp_rom_ok = '1' else
+           x"8" when fl_empty = '1' else
+           x"4" when fl_cpu_start = '1' else
+           x"2" when crc_error = '1' else
+           x"1" when sd_error = '0' else x"F";
 -- show '2' in case MPU200 is selected
 mpu200_dig <= x"2" when is_MPU200 = '1' else x"F";
 BM: entity work.boot_message
@@ -500,11 +535,34 @@ port map(
 	cpu_reset_l => sd_cpu_reset_l,
 	-- feedback
 	crc_error => crc_error,
-	SDcard_error => SDcard_error
+	SDcard_error => sd_error,
+	o_no_card => sd_no_card
+	);
+
+----------------------
+-- configuration flash, x.30: starts when SD_Card found no card, reads the same game
+-- (same selection, same 8 KByte image) and writes it through the ROM write path.
+-- Layout and the empty-slot check (error 8): rtl/common/Flash_ROM.vhd.
+----------------------
+FLASHROM: entity work.Flash_ROM
+port map(
+	i_Clk => clk_50,
+	i_Rst_L => sd_no_card,
+	o_Flash_Clk  => FLASH_DCLK,
+	o_Flash_CS_n => FLASH_NCS,
+	o_Flash_MOSI => FLASH_ASDO,
+	i_Flash_MISO => FLASH_DATA0,
+	selection => not game_select,
+	address_rom => fl_addr,
+	data_rom => fl_data,
+	wr_rom => fl_wr,
+	cpu_start => fl_cpu_start,
+	Flash_error => fl_error,
+	flash_empty => fl_empty
 	);
 
 -- phase 2 starts when the ROM is in, from whichever source
-boot_phase(2) <= sd_cpu_reset_l or esp_rom_ok;
+boot_phase(2) <= sd_cpu_reset_l or esp_rom_ok or fl_cpu_start;
 
 	
 -----------------------------------------------
@@ -827,9 +885,13 @@ rom_U6_cs <= '1' when ( cpu_addr(15 downto 11) = "01011" or cpu_addr(15 downto 1
 -- read from SD (or the ESP32) and write to ram when rom_wr_any == 1.
 -- The two loaders never run together: SD_Card is held in reset while
 -- esp_rom_busy = '1'. On HW 1.x esp_rom_busy is constant '0' and this is the old path.
-rom_wr_any  <= wr_rom or esp_rom_wr;
-rom_wr_addr <= esp_rom_addr when esp_rom_busy = '1' else address_sd_card;
-rom_wr_data <= esp_rom_data when esp_rom_busy = '1' else data_sd_card;
+-- The flash loader (x.30) runs only after SD_Card has given up (sd_no_card), and
+-- SD_Card does not write any more then.
+rom_wr_any  <= wr_rom or esp_rom_wr or fl_wr;
+rom_wr_addr <= esp_rom_addr when esp_rom_busy = '1' else
+               fl_addr      when sd_no_card = '1' else address_sd_card;
+rom_wr_data <= esp_rom_data when esp_rom_busy = '1' else
+               fl_data      when sd_no_card = '1' else data_sd_card;
 
 rom_address <= rom_wr_addr(10 downto 0) when rom_wr_any = '1' else
 	cpu_addr(10 downto 0);

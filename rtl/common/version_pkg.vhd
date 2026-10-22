@@ -20,6 +20,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package version_pkg is
-	constant SW_SUB1 : std_logic_vector(3 downto 0) := x"0";
-	constant SW_SUB2 : std_logic_vector(3 downto 0) := x"6";
+	constant SW_SUB1 : std_logic_vector(3 downto 0) := x"3";
+	constant SW_SUB2 : std_logic_vector(3 downto 0) := x"0";
 end package version_pkg;

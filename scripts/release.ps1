@@ -20,13 +20,19 @@
 .PARAMETER Force
   Overwrite artefacts that already exist.
 
+.PARAMETER RomImage
+  Image of a SternFA SD card. Puts SternFA_<ver>_roms.jic (bitstream plus game ROMs in
+  the configuration flash, see build.ps1) next to every released .jic. Those files are
+  ignored by git, never go to GitHub (copyright) and are not in the changelog.
+
 .EXAMPLE
   .\release.ps1 -Note "SW .0.5 - CPU clock now 446/893 kHz on all boards"
 #>
 param(
     [Parameter(Mandatory)][string]$Note,
     [string[]]$Variants,
-    [switch]  $Force
+    [switch]  $Force,
+    [string]  $RomImage
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -62,13 +68,18 @@ foreach ($dir in $folders) {
         throw "$dst already exists - bump the version in rtl\common\version_pkg.vhd or use -Force"
     }
 
-    & (Join-Path $ScriptDir 'build.ps1') $meta.Name
+    $withRoms = $RomImage -and $ext -eq 'jic'
+    if ($withRoms) { & (Join-Path $ScriptDir 'build.ps1') $meta.Name -RomImage $RomImage }
+    else           { & (Join-Path $ScriptDir 'build.ps1') $meta.Name }
     if ($LASTEXITCODE -ne 0) { throw "build failed for $($meta.Name)" }
 
     $src = Join-Path $dir.FullName "output_files\$project.$ext"
     if (-not (Test-Path $src)) { throw "missing artefact: $src" }
     New-Item -ItemType Directory -Force $outDir | Out-Null
     Copy-Item $src $dst -Force
+    if ($withRoms) {
+        Copy-Item (Join-Path $dir.FullName 'output_files\sternfa_roms.jic') ($dst -replace '\.jic$', '_roms.jic') -Force
+    }
     $hash = (Get-FileHash $dst -Algorithm SHA256).Hash.Substring(0, 16)
     $made += [pscustomobject]@{
         Variant = $meta.Name

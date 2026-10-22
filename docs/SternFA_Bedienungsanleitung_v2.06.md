@@ -292,8 +292,18 @@ Statusanzeige erscheint eine Fehlerziffer:
 | `1` | allgemeines Problem mit der SD-Karte — es konnten keine Daten gelesen werden. Karte fehlt, ist nicht roh beschrieben oder nicht lesbar |
 | `2` | CRC-Fehler: Daten wurden gelesen, aber die Prüfsumme des Spielblocks passt nicht. Das Image ist beschädigt, oder die Karte ist unzuverlässig |
 | `3` | kein Fehler: das ROM kam vom ESP32-Modul (nur Hardware 2.0, Kapitel 9.7) |
+| `4` | kein Fehler: keine SD-Karte, das ROM kam aus dem Konfigurationsflash (ab x.30) |
+| `8` | keine SD-Karte, und das gewählte Spiel liegt nicht im Konfigurationsflash (ab x.30) |
 
 Gelingt das Lesen, bleibt die rote LED dunkel und es erscheint keine Fehlerziffer.
+
+**Ab x.30: Spiele ohne SD-Karte.** Antwortet keine SD-Karte, holt SternFA das Spiel aus dem
+Konfigurationsflash (EPCS16) des FPGA-Boards. Die Spielnummer ist dieselbe wie auf der Karte. Die
+normale Release-Datei `SternFA_<Version>.jic` enthält aus Urheberrechtsgründen **keine** Spiele;
+ohne Karte endet der Start dann mit Ziffer `8`, und die rote LED blinkt achtmal schnell, gefolgt
+von einer Pause. Die Spiele kommen mit einer lokal erzeugten Datei `SternFA_<Version>_roms.jic`
+(Bitstream und alle Spiele der SD-Karte v098) in den Flash. Eine Karte mit CRC-Fehler (Ziffer `2`)
+wird nicht durch den Flash ersetzt, sondern bleibt ein Fehler.
 
 ### 5.4. Phase 3: das Spiel läuft an
 
@@ -903,7 +913,8 @@ Credit              4   zählt 4, 3, 2, 1, 0 herunter
 FA-Control-Übernahme)
 
 **SD-Fehlerziffer in der Statusanzeige:** `1` = Karte nicht lesbar · `2` = Prüfsumme des
-Spielblocks falsch · `3` = ROM kam vom ESP32 (kein Fehler, nur HW 2.0)
+Spielblocks falsch · `3` = ROM kam vom ESP32 (kein Fehler, nur HW 2.0) · `4` = ROM aus dem
+Konfigurationsflash, keine Karte (kein Fehler, ab x.30) · `8` = keine Karte, Spiel nicht im Flash
 
 **Taster:** SW2 Reset (FPGA-Platine) · S6 „Bally Test" = Selbsttest · S33 Bookkeeping-Reset ·
 S8 gehört zum ESP32 · SW3 ohne Funktion

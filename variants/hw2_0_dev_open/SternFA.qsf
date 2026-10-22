@@ -55,6 +55,10 @@ set_instance_assignment -name VIRTUAL_PIN ON -to DISP_LA_STR[2]
 set_instance_assignment -name VIRTUAL_PIN ON -to DISP_LA_STR[3]
 set_instance_assignment -name VIRTUAL_PIN ON -to DISP_LA_STR[4]
 set_instance_assignment -name VIRTUAL_PIN ON -to DISP_LA_STR[5]
+set_instance_assignment -name VIRTUAL_PIN ON -to FLASH_DCLK
+set_instance_assignment -name VIRTUAL_PIN ON -to FLASH_NCS
+set_instance_assignment -name VIRTUAL_PIN ON -to FLASH_ASDO
+set_instance_assignment -name VIRTUAL_PIN ON -to FLASH_DATA0
 
 # --- pins ------------------------------------------------------------------
 set_location_assignment PIN_91 -to clk_50
@@ -165,6 +169,7 @@ set_global_assignment -name VHDL_FILE ../../rtl/common/byte_to_decimal.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/EEprom.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/one_pulse_only.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/SD_Card.vhd
+set_global_assignment -name VHDL_FILE ../../rtl/common/Flash_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/zc_indicator.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/SPI_Master.vhd
 set_global_assignment -name VHDL_FILE ../../rtl/common/slow_to_fast_clock_bus.vhd

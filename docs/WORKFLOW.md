@@ -52,6 +52,30 @@ cd "N:\Projekte\FPGA Stern\FPGA_source"
 
 `check.ps1` exits 0 clean, 1 on a build error, 2 on baseline drift.
 
+## Game ROMs in the configuration flash (x.30)
+
+Without an SD card every board loads the selected game from its EPCS16
+(`rtl/common/Flash_ROM.vhd`). The released `.jic` carries **no** ROMs — they are
+copyrighted. The ROM version is built locally from an SD card image and never committed:
+
+```powershell
+# one board: output_files\sternfa_roms.jic next to SternFA.jic
+.\scripts\build.ps1 hw1_1_cyclone_10 -RomImage "..\SternFA_SD_098_CRC.img"
+
+# release: SternFA_<ver>_roms.jic next to every SternFA_<ver>.jic (ignored by git)
+.\scripts\release.ps1 -Note "..." -RomImage "..\SternFA_SD_098_CRC.img"
+
+# only the flash content, with a read-back check
+.\scripts\make_flash_hex.ps1 -Image "..\SternFA_SD_098_CRC.img" -Out x.hex -Verify
+```
+
+The card has 64 KByte slots 0..237; as 8 KByte slots they would not fit behind the
+bitstream (1.5 MByte). `make_flash_hex.ps1` therefore stores every 2 KByte ROM chip once
+and writes a directory (256 slots × 4 chips) in front of them — free play versions and the
+shared Bally U6 images cost nothing extra. Image v098: 204 games in 299 chips, 598 KByte.
+Slots whose CRC does not match (the `64K` filler of `_make_SD.bat`) stay empty and end in
+error 8. Layout: header of `Flash_ROM.vhd`.
+
 **The acceptance criterion is `Comb` / `Reg` / `Memory`**, straight out of
 `map.rpt` — those are a property of the design. The fitter's `LEfit` column is
 information only: a single extra `VIRTUAL_PIN` moves it without anything having

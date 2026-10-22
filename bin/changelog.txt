@@ -24,3 +24,9 @@
   hw1_1_cyclone_10     4.0.6    SternFA_406.jic  sha256:41B7BEAB0BF2935B
   hw1_1_cyclone_IV     3.0.6    SternFA_306.jic  sha256:1E41E2DE371F3E9A
   hw2_0_dev_open       5.0.6    SternFA_506.jic  sha256:2364A1B9E2EE2FD6
+
+2026-10-22 11:06  version .3.0
+  SW .3.0 (x.30, nach BallyFA/WillFA7) - Spiel-ROMs aus dem Konfigurationsflash (EPCS16), wenn keine SD-Karte antwortet (SD_Card v2.1 o_no_card; ein CRC-Fehler bleibt ein Kartenfehler). rtl\common\Flash_ROM.vhd liest dasselbe Spiel unter derselben Nummer: Verzeichnis 256 x 4 Blocknummern ab 080000h, dahinter jeder 2-KByte-Chip nur einmal - so passen alle 204 Spiele der Karte v098 (Slots 0..237) in 299 Bloecke/598 KByte. Statusziffer 4 = ROM aus dem Flash, 8 = Spiel nicht im Flash (SD-LED blinkt 8x). Diese Release-Dateien enthalten KEINE Spiele (Urheberrecht) - ohne Karte also Fehler 8; die ROM-Fassung *_roms.jic entsteht lokal mit release.ps1/build.ps1 -RomImage. Flash-Pins 12/8/6/13 als User-I/O, HW 1.0 und Cyclone 10 damit bei 100 % Pins. HW 2.0 NICHT in x.30: PIN_11 (ESP32-RX) neben DCLK laesst sich nicht platzieren (Error 169182), bleibt 5.0.6. NICHT AN HARDWARE GETESTET, weder der Flash-Rueckfall noch der normale SD-Start mit dieser Version.
+  hw1_0_cyclone_IV     1.3.0    SternFA_130.jic  sha256:3E606476B0D753DE
+  hw1_1_cyclone_10     4.3.0    SternFA_430.jic  sha256:E782A13AF0627F48
+  hw1_1_cyclone_IV     3.3.0    SternFA_330.jic  sha256:170C57018A9640DD

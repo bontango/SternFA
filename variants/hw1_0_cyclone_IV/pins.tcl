@@ -99,3 +99,12 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to reset_sw
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to OPT_DIPS
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to GS_DIPS
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to SW_Selftest
+
+# Configuration flash EPCS16 (x.30, rtl/common/Flash_ROM.vhd): the dedicated
+# configuration pins, the same on EP4CE6E22 and 10CL006YE144 (~ALTERA_DCLK~ 12,
+# ~ALTERA_DATA0~ 13, ~ALTERA_FLASH_nCE_nCSO~ 8, ~ALTERA_ASDO_DATA1~ 6). Released as
+# regular I/O in device.tcl.
+set_location_assignment PIN_12 -to FLASH_DCLK
+set_location_assignment PIN_8 -to FLASH_NCS
+set_location_assignment PIN_6 -to FLASH_ASDO
+set_location_assignment PIN_13 -to FLASH_DATA0

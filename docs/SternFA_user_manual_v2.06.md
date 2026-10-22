@@ -287,8 +287,18 @@ display:
 | `1` | general problem with the SD card - no data could be read. Card missing, not written raw, or not readable |
 | `2` | CRC error: data was read, but the checksum of the game block does not match. The image is damaged, or the card is unreliable |
 | `3` | no error: the rom came from the ESP32 module (hardware 2.0 only, chapter 9.7) |
+| `4` | no error: no SD card, the rom came from the configuration flash (x.30 and later) |
+| `8` | no SD card, and the selected game is not in the configuration flash (x.30 and later) |
 
 If the read succeeds, the red LED stays dark and no error digit appears.
+
+**From x.30 on: games without an SD card.** When no SD card answers, SternFA loads the game from
+the configuration flash (EPCS16) of the FPGA board, under the same game number as on the card.
+The regular release file `SternFA_<version>.jic` carries **no** games, for copyright reasons;
+without a card the boot then ends with digit `8`, and the red LED blinks eight times quickly,
+then pauses. The games get into the flash with a locally built `SternFA_<version>_roms.jic`
+(bitstream plus every game of SD card v098). A card with a CRC error (digit `2`) is not replaced
+by the flash, it stays an error.
 
 ### 5.4. Phase 3: program execution
 
@@ -875,7 +885,8 @@ Credit              4    counts down 4, 3, 2, 1, 0
 (blinks at start, then lit while the game runs; lit continuously during an FA-Control takeover)
 
 **SD card error digit in the status display:** `1` = card not readable · `2` = checksum of the
-game block wrong · `3` = rom came from the ESP32 (no error, HW 2.0 only)
+game block wrong · `3` = rom came from the ESP32 (no error, HW 2.0 only) · `4` = rom from the
+configuration flash, no card (no error, x.30 and later) · `8` = no card, game not in the flash
 
 **Buttons:** SW2 reset (FPGA board) · S6 'Bally Test' = self test · S33 bookkeeping reset ·
 S8 belongs to the ESP32 · SW3 has no function
