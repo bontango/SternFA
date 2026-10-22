@@ -210,7 +210,7 @@ a dead bus.
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
-Chapter 9 of `docs/SternFA_user_manual_v2.06.md` (German: `docs/SternFA_Bedienungsanleitung_v2.06.md`) describes all of this for the operator.
+Chapter 9 of `docs/SternFA_user_manual.md` (German: `docs/SternFA_Bedienungsanleitung.md`) describes all of this for the operator.
 
 ## The CPU clock, and why .0.5 exists
 

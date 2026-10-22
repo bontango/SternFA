@@ -4,20 +4,21 @@
 
 **Hardware version 2.0**
 
-**Software version 5.06**
+**Software version 5.30**
 
 **user manual**
 
 ralf@lisy.dev
 
-v1.1 19.09.2026
+v1.2 22.10.2026
 
-> Eine deutsche Fassung gibt es unter `SternFA_Bedienungsanleitung_v2.06.md`.
-> A German version is available as `SternFA_Bedienungsanleitung_v2.06.md`. The chapter
+> Eine deutsche Fassung gibt es unter `SternFA_Bedienungsanleitung.md`.
+> A German version is available as `SternFA_Bedienungsanleitung.md`. The chapter
 > numbering is the same in both.
 >
-> This manual describes **hardware version 2.0** with software **5.06**. For the older
-> boards (HW 1.0 and HW 1.1) the manual `SternFA_user manual_v1.04.pdf` still applies - with
+> This manual describes **hardware version 2.0** (PCB v2.00 to v2.02) with software **5.30**.
+> For the older
+> boards (HW 1.0 and HW 1.1) the manual `SternFA_user_manual_v1.04.pdf` still applies - with
 > one exception: from software x.06 on, anti flicker is option **Dip5**, not Dip4 (chapter 4.2).
 > What changed between the two board generations is listed in chapter 12.
 
@@ -95,9 +96,10 @@ components it is possible to build your Stern replacement MPU for less than 80.
 - **All DIP switches are read once, during boot.** Changing one while the game runs has no
   effect at all - and on hardware 2.0 that is not a convention but a physical fact, see
   chapter 4.3.
-- **The board needs its SD card** - unless the game rom sits on the ESP32 module (chapter 9.7).
-  The game roms are not in the FPGA; they are read at every power-up, from the module if it has
-  the selected game, otherwise from the card. No card and no rom on the module, no game.
+- **The board needs its SD card** - unless the game rom sits on the ESP32 module (chapter 9.7)
+  or in the configuration flash (from 5.30, chapter 5.3). The game roms are loaded anew at every
+  power-up: from the module if it has the selected game, otherwise from the card, and without a
+  card from the flash. If the game is in none of the three places, there is no game.
 - **The version shown at boot starts with a `5` on this board.** That digit identifies the
   board variant - see chapter 11. If it does not say 5, you have the wrong program in the FPGA.
 
@@ -298,9 +300,12 @@ The regular release file `SternFA_<version>.jic` carries **no** games, for copyr
 without a card the boot then ends with digit `8`, and the red LED blinks eight times quickly,
 then pauses. The games get into the flash with a locally built `SternFA_<version>_roms.jic`
 (bitstream plus every game of SD card v098). A card with a CRC error (digit `2`) is not replaced
-by the flash, it stays an error. On hardware 2.x this needs PCB v2.02 or a v2.00/v2.01
-rewired the same way (firmware 5.3.0, order ESP32 → SD card → flash). An unmodified v2.00/v2.01
-loses the ESP32 module with 5.3.0 and stays on 5.0.6.
+by the flash, it stays an error.
+
+On hardware 2.0 the order is therefore **ESP32 module → SD card → flash**. Software 5.30 needs
+the pin assignment of PCB **v2.02** for this. A v2.00 or v2.01 can be modified with two cuts and
+one wire (chapter 13); left unmodified it loses the connection to the ESP32 module with 5.30 and
+therefore stays on 5.06.
 
 ### 5.4. Phase 3: program execution
 
@@ -531,7 +536,8 @@ The FPGA program itself and the SD card image are in the SternFA software reposi
 > **<https://lisy.dev/swrep/SternFA>**
 
 **Make sure you take the version for your board** - see chapter 11. For hardware 2.0 that is the
-file whose name starts with `SternFA_5`, for example `SternFA_506.jic`.
+file whose name starts with `SternFA_5`, for example `SternFA_530.jic`. A PCB v2.00/v2.01 that
+has not been modified as described in chapter 13 stays on `SternFA_506.jic`.
 
 The FPGA on this board is configured from a serial configuration device, so the program stays in
 place after a power cycle. You program it once, not at every start.
@@ -548,6 +554,8 @@ drive the wrong pins.
 | **3** | SternFA PCB v1.1 with the Cyclone IV v4 FPGA board |
 | **4** | SternFA PCB v1.1 with the Cyclone 10 FPGA board |
 | **5** | **SternFA PCB v2.0 with the `dev_open` Cyclone IV board - this manual** |
+
+Within the 5 series: **from 5.30 on, only PCB v2.02 or a modified v2.00/v2.01** (chapter 13).
 
 **The info display tells you which program is running:** the first of the three version digits
 on player display 1 is the board number. If you loaded the wrong one, the displays will most
@@ -572,6 +580,9 @@ If you know the older boards, this is the short list:
   required.
 - **Two pull-up resistors on the DIP return lines are missing on PCB v2.00** and have to be
   added by hand (chapter 13). From v2.01 on they are fitted.
+- **From PCB v2.02 on, `ESP32_RX` and `SB_IRQ/` have swapped their FPGA pins.** Software 5.30
+  needs this for the games from the configuration flash. A v2.00/v2.01 can be modified
+  (chapter 13).
 - **The unused SB_IRQ input** is still routed on the board but is not evaluated, as before.
 
 Everything that mattered to the player is unchanged: same connectors, same mounting holes, same
@@ -586,6 +597,18 @@ game list, same SD card image, same options 1 to 3 and 6 - option 4 (anti flicke
   DIP switch at all - the info display shows game 255 and the boot stops with an SD card error.
   Fit a 10 kOhm resistor from each of the two lines to +3V (3.3 V). From PCB v2.01 on they are part of
   the assembly.
+- **PCB v2.00 and v2.01 need a modification for software 5.30.** From 5.30 on the FPGA uses four
+  pins of the configuration flash after boot, to load games from it (5.3). Right next to the
+  flash clock pin there must then be no output - and that is exactly where, on FPGA PIN_11, the
+  transmit line to the ESP32 module used to be. From PCB v2.02 on it therefore swaps places
+  with the unused `SB_IRQ/` line. On a v2.00/v2.01:
+  1. cut the connection FPGA PIN_11 ↔ `ESP32_RX`
+  2. cut the connection FPGA PIN_119 ↔ `SB_IRQ/`
+  3. add a wire from FPGA PIN_119 to `ESP32_RX` (socket X7, GPIO6 of the module)
+  4. optionally add a wire from `SB_IRQ/` to FPGA PIN_11 (the software does not read it so far)
+
+  The modification has been tried on a v2.00. If you do not want to modify your board, stay on
+  `SternFA_506.jic`.
 - **FA-Control has run on the bench, not yet in a machine.** Software 5.04 was the first version
   with it; with 5.06 the web interface connects and shows `SternFA / 5.0.6` with 60 lamps,
   19 coils, 40 switches, 5 displays, handing control back restarts the game and pulling the
@@ -894,3 +917,4 @@ configuration flash, no card (no error, x.30 and later) · `8` = no card, game n
 S8 belongs to the ESP32 · SW3 has no function
 
 **FPGA program for this board: `SternFA_5xx`** - a version not starting with 5 is the wrong board.
+From 5.30 on only PCB v2.02 or a modified v2.00/v2.01 (chapter 13).

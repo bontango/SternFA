@@ -4,19 +4,20 @@
 
 **Hardware-Version 2.0**
 
-**Software-Version 5.06**
+**Software-Version 5.30**
 
 **Bedienungsanleitung**
 
 ralf@lisy.dev
 
-v1.1 19.09.2026
+v1.2 22.10.2026
 
-> Deutsche Fassung von `SternFA_user manual_v2.06.md`. Die Kapitelnummern sind in beiden
+> Deutsche Fassung von `SternFA_user_manual.md`. Die Kapitelnummern sind in beiden
 > Fassungen gleich.
 >
-> Diese Anleitung beschreibt **Hardware-Version 2.0** mit Software **5.06**. Für die älteren
-> Platinen (HW 1.0 und HW 1.1) gilt weiterhin `SternFA_user manual_v1.04.pdf` — mit einer
+> Diese Anleitung beschreibt **Hardware-Version 2.0** (Platine v2.00 bis v2.02) mit Software
+> **5.30**. Für die älteren
+> Platinen (HW 1.0 und HW 1.1) gilt weiterhin `SternFA_user_manual_v1.04.pdf` — mit einer
 > Ausnahme: ab Software x.06 liegt Anti-Flicker auf Options-**Dip5**, nicht auf Dip4 (Kapitel 4.2). Was sich
 > zwischen den beiden Platinengenerationen geändert hat, steht in Kapitel 12.
 
@@ -95,9 +96,9 @@ Bauteile kaufen, lässt sich Ihre Stern-Ersatz-MPU für unter 80 aufbauen.
   umzulegen bewirkt nichts — und bei Hardware 2.0 ist das keine Konvention, sondern eine
   physikalische Tatsache, siehe Kapitel 4.3.
 - **Die Platine braucht ihre SD-Karte** — es sei denn, das Spiel-ROM liegt auf dem ESP32-Modul
-  (Kapitel 9.7). Die Spiel-ROMs stecken nicht im FPGA, sie werden bei jedem Einschalten gelesen:
-  vom Modul, wenn es das gewählte Spiel hat, sonst von der Karte. Keine Karte und kein ROM auf
-  dem Modul, kein Spiel.
+  (Kapitel 9.7) oder im Konfigurationsflash (ab 5.30, Kapitel 5.3). Die Spiel-ROMs werden bei
+  jedem Einschalten neu geladen: vom Modul, wenn es das gewählte Spiel hat, sonst von der Karte,
+  und ohne Karte aus dem Flash. Liegt das Spiel an keiner der drei Stellen, gibt es kein Spiel.
 - **Die beim Start angezeigte Version beginnt auf dieser Platine mit einer `5`.** Diese Ziffer
   kennzeichnet die Platinenvariante — siehe Kapitel 11. Steht dort keine 5, liegt das falsche
   Programm im FPGA.
@@ -303,10 +304,12 @@ normale Release-Datei `SternFA_<Version>.jic` enthält aus Urheberrechtsgründen
 ohne Karte endet der Start dann mit Ziffer `8`, und die rote LED blinkt achtmal schnell, gefolgt
 von einer Pause. Die Spiele kommen mit einer lokal erzeugten Datei `SternFA_<Version>_roms.jic`
 (Bitstream und alle Spiele der SD-Karte v098) in den Flash. Eine Karte mit CRC-Fehler (Ziffer `2`)
-wird nicht durch den Flash ersetzt, sondern bleibt ein Fehler. Auf Hardware 2.x gilt das ab
-Platine v2.02 bzw. einer entsprechend umgebauten v2.00/v2.01 (Firmware 5.3.0, Reihenfolge
-ESP32 → SD-Karte → Flash). Ein nicht umgebautes v2.00/v2.01 verliert mit 5.3.0 das ESP32-Modul
-und bleibt deshalb bei 5.0.6.
+wird nicht durch den Flash ersetzt, sondern bleibt ein Fehler.
+
+Auf Hardware 2.0 ist die Reihenfolge damit **ESP32-Modul → SD-Karte → Flash**. Software 5.30
+braucht dafür die Pinbelegung von Platine **v2.02**. Eine v2.00 oder v2.01 lässt sich mit zwei
+Schnitten und einer Brücke umbauen (Kapitel 13); unverändert verliert sie mit 5.30 die
+Verbindung zum ESP32-Modul und bleibt deshalb bei 5.06.
 
 ### 5.4. Phase 3: das Spiel läuft an
 
@@ -547,7 +550,9 @@ Das FPGA-Programm selbst und das SD-Karten-Image liegen im SternFA-Software-Repo
 > **<https://lisy.dev/swrep/SternFA>**
 
 **Achten Sie darauf, die Version für Ihre Platine zu nehmen** — siehe Kapitel 11. Für Hardware
-2.0 ist das die Datei, deren Name mit `SternFA_5` beginnt, zum Beispiel `SternFA_506.jic`.
+2.0 ist das die Datei, deren Name mit `SternFA_5` beginnt, zum Beispiel `SternFA_530.jic`.
+Für eine Platine v2.00/v2.01, die nicht nach Kapitel 13 umgebaut ist, bleibt es bei
+`SternFA_506.jic`.
 
 Das FPGA auf dieser Platine wird aus einem seriellen Konfigurationsbaustein geladen; das
 Programm bleibt also nach dem Ausschalten erhalten. Sie programmieren es einmal, nicht bei jedem
@@ -565,6 +570,9 @@ nichts an und treibt im schlechtesten die falschen Anschlüsse.
 | **3** | SternFA-Platine v1.1 mit der FPGA-Platine Cyclone IV v4 |
 | **4** | SternFA-Platine v1.1 mit der FPGA-Platine Cyclone 10 |
 | **5** | **SternFA-Platine v2.0 mit der `dev_open`-Cyclone-IV-Platine — diese Anleitung** |
+
+Innerhalb der 5er-Reihe gilt: **ab 5.30 nur Platine v2.02 oder eine umgebaute v2.00/v2.01**
+(Kapitel 13).
 
 **Die Info-Anzeige sagt Ihnen, welches Programm läuft:** die erste der drei Versionsziffern auf
 der Anzeige von Spieler 1 ist die Platinennummer. Haben Sie das falsche geladen, bleiben die
@@ -589,6 +597,9 @@ Wer die älteren Platinen kennt, für den ist das die Kurzfassung:
   nicht mehr nötig.
 - **Auf PCB v2.00 fehlen zwei Pull-up-Widerstände an den DIP-Rückleitungen**; sie müssen von
   Hand nachgerüstet werden (Kapitel 13). Ab v2.01 sind sie bestückt.
+- **Ab PCB v2.02 haben `ESP32_RX` und `SB_IRQ/` ihre FPGA-Pins getauscht.** Das braucht
+  Software 5.30 für die Spiele aus dem Konfigurationsflash. Eine v2.00/v2.01 lässt sich
+  umbauen (Kapitel 13).
 - **Der unbenutzte SB_IRQ-Eingang** ist weiterhin auf der Platine geführt, wird aber wie bisher
   nicht ausgewertet.
 
@@ -606,6 +617,17 @@ und 6 — Option 4 (Anti-Flicker) liegt jetzt auf DIP 5.
   Spiel 255, und der Start bleibt mit einem SD-Karten-Fehler stehen. Je einen 10-kOhm-Widerstand
   von jeder der beiden Leitungen nach +3V (3,3 V) einlöten. Ab PCB v2.01 gehören sie zur
   Bestückung.
+- **PCB v2.00 und v2.01 brauchen für Software 5.30 einen Umbau.** Ab 5.30 benutzt das FPGA
+  nach dem Start vier Anschlüsse des Konfigurationsflashs, um Spiele daraus zu laden (5.3).
+  Direkt neben dem Taktanschluss des Flashs darf dann kein Ausgang liegen — und genau dort,
+  an FPGA-PIN_11, lag bisher die Sendeleitung zum ESP32-Modul. Ab PCB v2.02 tauscht sie
+  deshalb den Platz mit der unbenutzten Leitung `SB_IRQ/`. Auf einer v2.00/v2.01:
+  1. Verbindung FPGA-PIN_11 ↔ `ESP32_RX` auftrennen
+  2. Verbindung FPGA-PIN_119 ↔ `SB_IRQ/` auftrennen
+  3. Brücke von FPGA-PIN_119 nach `ESP32_RX` (Steckplatz X7, GPIO6 des Moduls)
+  4. optional Brücke von `SB_IRQ/` nach FPGA-PIN_11 (die Software liest ihn derzeit nicht)
+
+  Der Umbau ist an einer v2.00 erprobt. Wer nicht umbauen will, bleibt bei `SternFA_506.jic`.
 - **FA-Control ist auf der Werkbank gelaufen, aber noch nicht in einem Automaten.** Software 5.04
   war die erste Version damit; mit 5.06 verbindet sich die Weboberfläche und zeigt
   `SternFA / 5.0.6` mit 60 Lampen, 19 Spulen, 40 Schaltern, 5 Displays, die Rückgabe startet das
@@ -923,4 +945,4 @@ Konfigurationsflash, keine Karte (kein Fehler, ab x.30) · `8` = keine Karte, Sp
 S8 gehört zum ESP32 · SW3 ohne Funktion
 
 **FPGA-Programm für diese Platine: `SternFA_5xx`** — eine Version, die nicht mit 5 beginnt, ist
-die falsche Platine.
+die falsche Platine. Ab 5.30 nur PCB v2.02 oder umgebaute v2.00/v2.01 (Kapitel 13).
