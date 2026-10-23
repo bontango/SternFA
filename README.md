@@ -11,6 +11,14 @@ the original Stern SB-300 or J5 sound board.
 
 Ralf Thelen ('bontango') · <https://lisy.dev> · <https://lisy.dev/swrep/SternFA>
 
+## User manuals
+
+**Read online:** <https://bontango.github.io/SternFA/>
+
+- [User manual HW 2.0 (English)](https://bontango.github.io/SternFA/SternFA_user_manual.html)
+- [Bedienungsanleitung HW 2.0 (Deutsch)](https://bontango.github.io/SternFA/SternFA_Bedienungsanleitung.html)
+- [User manual HW 1.x (English)](https://bontango.github.io/SternFA/SternFA_HW1_x_user_manual.html)
+
 > **State of this tree, 08.09.2026 — read this before flashing anything.**
 >
 > Two things happened on the same day. The four board variants were merged into one
@@ -210,7 +218,7 @@ a dead bus.
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
-Chapter 9 of `docs/SternFA_user_manual.html` (German: `docs/SternFA_Bedienungsanleitung.html`) describes all of this for the operator.
+Chapter 9 of the [user manual](https://bontango.github.io/SternFA/SternFA_user_manual.html) (German: [Bedienungsanleitung](https://bontango.github.io/SternFA/SternFA_Bedienungsanleitung.html)) describes all of this for the operator.
 
 ## The CPU clock, and why .0.5 exists
 
