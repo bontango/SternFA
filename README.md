@@ -74,7 +74,7 @@ rtl/common/         all functional modules, the two packages and SternFA.sdc
 rtl/fa_control/     the LISY slave for the ESP32-C3 - see chapter 4
 rtl/cyclone_IV/     the four megafunctions generated for Cyclone IV E
 rtl/cyclone_10/     the same four, generated for Cyclone 10 LP - picked via RtlFamily
-docs/               user manuals, schematics, WORKFLOW.md
+docs/               user manuals (HTML: HW 2.0 en/de, HW 1.x), schematics, WORKFLOW.md
 bin/                released artefacts per board + changelog.txt
 scripts/            gen_qsf.ps1, check.ps1, build.ps1, release.ps1 + the .qsf fragments
 variants/<name>/    variant_pkg.vhd  BOARD_ID, HAS_DISP_LA_STR, HAS_ESP32
@@ -210,7 +210,7 @@ a dead bus.
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
-Chapter 9 of `docs/SternFA_user_manual.md` (German: `docs/SternFA_Bedienungsanleitung.md`) describes all of this for the operator.
+Chapter 9 of `docs/SternFA_user_manual.html` (German: `docs/SternFA_Bedienungsanleitung.html`) describes all of this for the operator.
 
 ## The CPU clock, and why .0.5 exists
 
