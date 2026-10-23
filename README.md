@@ -17,7 +17,10 @@ Ralf Thelen ('bontango') · <https://lisy.dev> · <https://lisy.dev/swrep/SternF
 
 - [User manual HW 2.0 (English)](https://bontango.github.io/SternFA/SternFA_user_manual.html)
 - [Bedienungsanleitung HW 2.0 (Deutsch)](https://bontango.github.io/SternFA/SternFA_Bedienungsanleitung.html)
+- [Manuel d'utilisation HW 2.0 (Français)](https://bontango.github.io/SternFA/SternFA_manuel_utilisateur.html)
 - [User manual HW 1.x (English)](https://bontango.github.io/SternFA/SternFA_HW1_x_user_manual.html)
+- [Bedienungsanleitung HW 1.x (Deutsch)](https://bontango.github.io/SternFA/SternFA_HW1_x_Bedienungsanleitung.html)
+- [Manuel d'utilisation HW 1.x (Français)](https://bontango.github.io/SternFA/SternFA_HW1_x_manuel_utilisateur.html)
 
 > **State of this tree, 08.09.2026 — read this before flashing anything.**
 >
@@ -82,7 +85,7 @@ rtl/common/         all functional modules, the two packages and SternFA.sdc
 rtl/fa_control/     the LISY slave for the ESP32-C3 - see chapter 4
 rtl/cyclone_IV/     the four megafunctions generated for Cyclone IV E
 rtl/cyclone_10/     the same four, generated for Cyclone 10 LP - picked via RtlFamily
-docs/               user manuals (HTML: HW 2.0 en/de, HW 1.x), schematics, WORKFLOW.md
+docs/               user manuals (HTML: HW 2.0 and HW 1.x, each en/de/fr), schematics, WORKFLOW.md
 bin/                released artefacts per board + changelog.txt
 scripts/            gen_qsf.ps1, check.ps1, build.ps1, release.ps1 + the .qsf fragments
 variants/<name>/    variant_pkg.vhd  BOARD_ID, HAS_DISP_LA_STR, HAS_ESP32
@@ -218,7 +221,7 @@ a dead bus.
   coils and switches but not of the displays. No such board exists; the case is marked
   in the top level.
 
-Chapter 9 of the [user manual](https://bontango.github.io/SternFA/SternFA_user_manual.html) (German: [Bedienungsanleitung](https://bontango.github.io/SternFA/SternFA_Bedienungsanleitung.html)) describes all of this for the operator.
+Chapter 9 of the [user manual](https://bontango.github.io/SternFA/SternFA_user_manual.html) (German: [Bedienungsanleitung](https://bontango.github.io/SternFA/SternFA_Bedienungsanleitung.html), French: [manuel d'utilisation](https://bontango.github.io/SternFA/SternFA_manuel_utilisateur.html)) describes all of this for the operator.
 
 ## The CPU clock, and why .0.5 exists
 

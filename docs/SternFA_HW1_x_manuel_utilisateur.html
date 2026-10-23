@@ -1,0 +1,3987 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SternFA manuel d&#39;utilisation (HW 1.x)</title>
+  <style>
+
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">:root {
+--bg: #fbfaf7;
+--fg: #1d1f21;
+--muted: #5a5f66;
+--accent: #0b5cad;
+--rule: #d9d6cf;
+--code-bg: #f0eee8;
+--th-bg: #ece9e1;
+--row-alt: #f5f3ee;
+--note-bg: #eef4fb;
+--note-rule: #0b5cad;
+}
+@media (prefers-color-scheme: dark) {
+:root:not([data-theme="light"]) {
+--bg: #17191c;
+--fg: #e4e2dd;
+--muted: #a3a7ad;
+--accent: #6fb1f2;
+--rule: #3a3d42;
+--code-bg: #24272b;
+--th-bg: #2a2d32;
+--row-alt: #1d2024;
+--note-bg: #1c2633;
+--note-rule: #6fb1f2;
+}
+}
+:root[data-theme="dark"] {
+--bg: #17191c;
+--fg: #e4e2dd;
+--muted: #a3a7ad;
+--accent: #6fb1f2;
+--rule: #3a3d42;
+--code-bg: #24272b;
+--th-bg: #2a2d32;
+--row-alt: #1d2024;
+--note-bg: #1c2633;
+--note-rule: #6fb1f2;
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+background: var(--bg);
+color: var(--fg);
+font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+max-width: 58rem;
+margin: 0 auto;
+padding: 2rem 1rem 4rem;
+}
+h1, h2, h3, h4 { line-height: 1.25; margin: 2.2em 0 0.6em; }
+h1 { font-size: 2.2rem; margin-top: 0.5em; border-bottom: 3px solid var(--accent); padding-bottom: 0.2em; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid var(--rule); padding-bottom: 0.2em; }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.05rem; color: var(--muted); }
+a { color: var(--accent); }
+a:not(:hover) { text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+p, ul, ol, table, pre, blockquote { margin: 0 0 1em; }
+li { margin: 0.15em 0; }
+li > p { margin: 0.2em 0; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5em 0; }
+img { max-width: 100%; height: auto; display: block; margin: 1em auto; border-radius: 4px; }
+code {
+font-family: Consolas, "Cascadia Mono", "SFMono-Regular", Menlo, monospace;
+font-size: 0.9em;
+background: var(--code-bg);
+padding: 0.1em 0.3em;
+border-radius: 3px;
+}
+pre {
+background: var(--code-bg);
+padding: 0.8em 1em;
+border-radius: 4px;
+overflow-x: auto;
+line-height: 1.4;
+}
+pre code { background: none; padding: 0; font-size: 0.85em; }
+blockquote {
+background: var(--note-bg);
+border-left: 4px solid var(--note-rule);
+margin-left: 0;
+padding: 0.6em 1em;
+}
+blockquote > :last-child { margin-bottom: 0; }
+table {
+border-collapse: collapse;
+display: block;
+overflow-x: auto;
+max-width: 100%;
+font-size: 0.95em;
+}
+th, td { border: 1px solid var(--rule); padding: 0.3em 0.6em; vertical-align: top; text-align: left; }
+th { background: var(--th-bg); }
+tbody tr:nth-child(even) { background: var(--row-alt); }
+table.gamelist td, table.gamelist th { padding: 0.15em 0.45em; white-space: nowrap; }
+
+.titlepage { margin-bottom: 2.5em; }
+.titlepage p { margin: 0.2em 0; }
+@media (max-width: 600px) {
+body { font-size: 15px; padding: 1rem 1rem 3rem; }
+h1 { font-size: 1.8rem; }
+}
+@media print {
+body { background: #fff; color: #000; max-width: none; font-size: 10.5pt; padding: 0; }
+a { color: #000; text-decoration: none; }
+h2, h3 { break-after: avoid; }
+pre, table, img, blockquote { break-inside: avoid; }
+tbody tr:nth-child(even) { background: #f3f3f3; }
+}
+</style>
+</head>
+<body>
+<h1 id="sternfa">SternFA</h1>
+<p><strong>MPU Stern / Bally à base de FPGA</strong></p>
+<p><strong>Version matérielle 1.0 et 1.1</strong></p>
+<p><strong>Version logicielle x.30 (1.30, 3.30, 4.30)</strong></p>
+<p><strong>manuel d&#39;utilisation</strong></p>
+<p><a href="mailto:ralf@lisy.dev">ralf@lisy.dev</a></p>
+<p>v1.30 23.10.2026</p>
+<blockquote>
+<p>Version française de <a href="SternFA_HW1_x_user_manual.html">SternFA_HW1_x_user_manual.html</a>.
+Deutsche Fassung: <a href="SternFA_HW1_x_Bedienungsanleitung.html">SternFA_HW1_x_Bedienungsanleitung.html</a>.
+La numérotation des chapitres est la même dans les trois versions.</p>
+<p>Ce manuel décrit les <strong>cartes plus anciennes, matériel 1.0 et
+1.1</strong>, avec le logiciel x.30. Il remplace le manuel v1.04.</p>
+<p>Pour le <strong>matériel 2.0</strong> (cartes v2.00 à v2.02, avec le
+support ESP32), il existe un manuel séparé : <a href="SternFA_manuel_utilisateur.html">SternFA_manuel_utilisateur.html</a>.</p>
+<p><strong>Vous venez du manuel v1.04 ?</strong> L&#39;anti-scintillement se
+trouve maintenant sur l&#39;option <strong>Dip5</strong>, et non plus sur
+Dip4 (depuis le logiciel x.06, chapitre 4.2). Et à partir de x.30, la
+carte fonctionne aussi sans carte SD (chapitre 5.3).</p>
+</blockquote>
+<h2 id="table-des-matières">Table des matières</h2>
+<ul>
+<li><a href="#remarque-importante">Remarque importante</a></li>
+<li><a href="#1-introduction">1. Introduction</a></li>
+<li><a href="#2-démarrage-rapide">2. Démarrage rapide</a></li>
+<li><a href="#3-installation">3. Installation</a>
+<ul>
+<li><a href="#31-ce-que-sternfa-remplace-et-ce-quil-ne-remplace-pas">3.1. Ce
+que SternFA remplace et ce qu&#39;il ne remplace pas</a></li>
+<li><a href="#32-ce-qui-se-trouve-sur-la-carte">3.2. Ce qui se trouve
+sur la carte</a></li>
+</ul></li>
+<li><a href="#4-réglage-des-interrupteurs-dip">4. Réglage des
+interrupteurs DIP</a>
+<ul>
+<li><a href="#41-banc-dip-s1--choix-du-jeu">4.1. Banc DIP S1 : choix du
+jeu</a></li>
+<li><a href="#42-banc-dip-s2--options">4.2. Banc DIP S2 : options</a>
+<ul>
+<li><a href="#421-s2-dip1---émulateur-de-zero-cross">4.2.1. S2-Dip1
+-&gt; émulateur de zero cross</a></li>
+<li><a href="#422-s2-dip2---sauvegarde-continue-du-nvram">4.2.2. S2-Dip2
+-&gt; sauvegarde continue du nvram</a></li>
+<li><a href="#423-s2-dip3---forcer-un-jeu-bally">4.2.3. S2-Dip3 -&gt;
+forcer un jeu Bally</a></li>
+<li><a href="#424-s2-dip4---non-utilisé">4.2.4. S2-Dip4 -&gt; non
+utilisé</a></li>
+<li><a href="#425-s2-dip5---anti-scintillement-pour-les-jeux-à-led">4.2.5.
+S2-Dip5 -&gt; anti-scintillement pour les jeux à LED</a></li>
+<li><a href="#426-s2-dip6---initialisation-du-nvram">4.2.6. S2-Dip6
+-&gt; initialisation du nvram</a></li>
+</ul></li>
+<li><a href="#43-les-interrupteurs-dip-ne-sont-lus-quune-fois-au-démarrage">4.3.
+Les interrupteurs DIP ne sont lus qu&#39;une fois, au démarrage</a></li>
+</ul></li>
+<li><a href="#5-séquence-de-démarrage">5. Séquence de démarrage</a>
+<ul>
+<li><a href="#51-phase-1--laffichage-dinformations">5.1. Phase 1 :
+l&#39;affichage d&#39;informations</a></li>
+<li><a href="#52-phase-2--lecture-de-la-carte-sd">5.2. Phase 2 : lecture
+de la carte SD</a></li>
+<li><a href="#53-fonctionnement-sans-carte-sd-x30">5.3. Fonctionnement
+sans carte SD (x.30)</a></li>
+<li><a href="#54-phase-3--exécution-du-programme">5.4. Phase 3 :
+exécution du programme</a></li>
+</ul></li>
+<li><a href="#6-boutons-et-led-de-la-carte">6. Boutons et LED de la
+carte</a>
+<ul>
+<li><a href="#61-les-trois-led-détat">6.1. Les trois LED d&#39;état</a></li>
+<li><a href="#62-les-boutons">6.2. Les boutons</a></li>
+</ul></li>
+<li><a href="#7-la-carte-sd">7. La carte SD</a></li>
+<li><a href="#8-rom-de-jeu-dans-la-flash-du-fpga">8. ROM de jeu dans la
+flash du FPGA</a></li>
+<li><a href="#9-crédits-et-meilleurs-scores">9. Crédits et meilleurs
+scores</a></li>
+<li><a href="#10-programmer-le-fpga">10. Programmer le FPGA</a></li>
+<li><a href="#11-variantes-de-carte">11. Variantes de carte</a></li>
+<li><a href="#12-historique-des-versions">12. Historique des
+versions</a></li>
+<li><a href="#13-limites-connues">13. Limites connues</a></li>
+<li><a href="#annexe-a-choix-du-jeu">Annexe A choix du jeu</a></li>
+<li><a href="#annexe-b-aide-mémoire">Annexe B aide-mémoire</a></li>
+</ul>
+<h2 id="remarque-importante">Remarque importante</h2>
+<p>L&#39;utilisation de SternFA peut endommager votre flipper. Comme il
+s&#39;agit d&#39;un projet privé SANS intérêt commercial, l&#39;auteur décline toute
+responsabilité pour les dommages qui pourraient résulter de
+l&#39;utilisation de SternFA !</p>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>SternFA utilise un FPGA (bon marché) qui émule le matériel d&#39;une MPU
+Stern. Il reconstruit le processeur MC6800, les deux PIA 6821, la RAM de
+travail 6810, la RAM CMOS 5101 et les ROM de jeu, et il pilote les
+connecteurs d&#39;origine du flipper pour les afficheurs, les lampes, les
+interrupteurs et les bobines.</p>
+<p>Comme la même famille de MPU équipe les flippers Bally, SternFA fait
+tourner <strong>les jeux Stern MPU-100, Stern MPU-200 et Bally
+-17/-35</strong> - l&#39;image de carte SD contient 238 numéros de jeu, voir
+l&#39;annexe A. Le jeu exécuté se choisit avec les huit interrupteurs du
+banc DIP S1.</p>
+<p>SternFA est un projet 100 % amateur. Cela rend la solution bon marché
+: selon l&#39;endroit où vous achetez les composants, vous pouvez construire
+votre MPU Stern de remplacement pour moins de 80 €.</p>
+<p><strong>De quoi avez-vous besoin ?</strong></p>
+<ul>
+<li>Des notions de base en soudure (la plupart des fournisseurs livrent
+les composants CMS déjà montés)</li>
+<li>La possibilité de lire et d&#39;écrire des cartes micro SD</li>
+<li>Un PC avec un port USB et un USB Blaster pour programmer le
+FPGA</li>
+</ul>
+<p><strong>Trois choses sont bonnes à savoir avant de commencer
+:</strong></p>
+<ul>
+<li><strong>Tous les interrupteurs DIP ne sont lus qu&#39;une fois, au
+démarrage.</strong> En changer un pendant que le jeu tourne n&#39;a aucun
+effet - voir le chapitre 4.3.</li>
+<li><strong>Les ROM de jeu sont rechargées à chaque mise sous
+tension</strong> - depuis la carte SD, et à partir de x.30, sans carte,
+depuis la flash de configuration de la carte FPGA (chapitre 5.3). Si le
+jeu ne se trouve à aucun de ces deux endroits, il n&#39;y a pas de jeu.</li>
+<li><strong>Le premier chiffre de la version affichée au démarrage
+identifie la carte</strong> - <code>1</code>, <code>3</code> ou
+<code>4</code> sur les cartes de ce manuel, voir le chapitre 11. S&#39;il ne
+correspond pas à votre carte, le FPGA contient le mauvais
+programme.</li>
+</ul>
+<h2 id="2-démarrage-rapide">2. Démarrage rapide</h2>
+<ol type="1">
+<li>Téléchargez la dernière image de carte SD et le programme FPGA de
+votre carte sur lisy.dev (chapitre 10) :
+<ol type="1">
+<li><code>SternFA_1xx</code> pour la carte v1.0 avec la carte Cyclone
+IV</li>
+<li><code>SternFA_3xx</code> pour la carte v1.1 avec la carte Cyclone
+IV</li>
+<li><code>SternFA_4xx</code> pour la carte v1.1 avec la carte Cyclone
+10</li>
+</ol></li>
+<li>Écrivez l&#39;image sur une carte micro SD et insérez la carte dans la
+platine</li>
+<li>Programmez le FPGA</li>
+<li>Réglez le banc DIP S1 « choix du jeu » selon votre flipper (annexe
+A)</li>
+<li>Laissez pour commencer tout le banc DIP S2 « options » sur
+<strong>OFF</strong></li>
+<li>Remplacez votre MPU Stern/Bally d&#39;origine par SternFA</li>
+<li>Allumez le flipper</li>
+<li>Observez l&#39;affichage d&#39;informations pendant les premières secondes
+et vérifiez que la version et le numéro de jeu sont ceux attendus
+(chapitre 5.1)</li>
+<li>Amusez-vous</li>
+</ol>
+<h2 id="3-installation">3. Installation</h2>
+<p>Les cartes SternFA ont les mêmes connecteurs et les mêmes trous de
+fixation que les MPU Bally/Stern d&#39;origine ; le remplacement se fait
+donc en quelques secondes. Éteignez le flipper, retirez la MPU
+d&#39;origine, mettez SternFA en place, c&#39;est fini.</p>
+<h3 id="31-ce-que-sternfa-remplace-et-ce-quil-ne-remplace-pas">3.1. Ce
+que SternFA remplace et ce qu&#39;il ne remplace pas</h3>
+<p><strong>Remplacé :</strong> la carte MPU - processeur, RAM, ROM, les
+deux PIA et la logique d&#39;interface qui les entoure.</p>
+<p><strong>Toujours nécessaire :</strong> tout ce qui est en dehors de
+la MPU. SternFA pilote les connecteurs d&#39;origine et attend derrière eux
+les cartes d&#39;origine :</p>
+<ul>
+<li>la <strong>carte de pilotage des lampes</strong> (AS-2518-23 ou
+équivalent) avec ses décodeurs d&#39;adresse,</li>
+<li>la <strong>carte de pilotage des bobines</strong>,</li>
+<li>la ou les <strong>cartes d&#39;affichage</strong>,</li>
+<li>le <strong>redresseur / l&#39;alimentation</strong>, qui fournit aussi
+le signal zero cross,</li>
+<li>pour les jeux MPU-200, la <strong>carte son Stern SB-300</strong>
+sur le connecteur J5.</li>
+</ul>
+<p>SternFA ne reconstruit aucune de ces cartes. Il se comporte envers
+elles exactement comme la MPU d&#39;origine.</p>
+<h3 id="32-ce-qui-se-trouve-sur-la-carte">3.2. Ce qui se trouve sur la
+carte</h3>
+<table>
+<tbody>
+<tr>
+<td>Carte FPGA</td>
+<td>carte v1.0 : Cyclone IV E (EP4CE6E22) · carte v1.1 : Cyclone IV E
+(EP4CE6E22) ou Cyclone 10 LP (10CL006)</td>
+</tr>
+<tr>
+<td>Horloge</td>
+<td>oscillateur 50 MHz sur la carte FPGA ; le 6800 émulé tourne à
+environ <strong>446 kHz</strong> pour les jeux Bally / MPU-100 et
+environ <strong>893 kHz</strong> pour les jeux Stern MPU-200 - l&#39;horloge
+du quartz d&#39;origine de 3,58 MHz divisée par 8 et par 4</td>
+</tr>
+<tr>
+<td>Carte SD</td>
+<td>support micro SD, lu en mode brut - c&#39;est de là que viennent les ROM
+de jeu</td>
+</tr>
+<tr>
+<td>Flash de configuration</td>
+<td>EPCS16 sur la carte FPGA. Contient le programme FPGA et, à partir de
+x.30, en option les ROM de jeu (chapitre 8)</td>
+</tr>
+<tr>
+<td>FRAM</td>
+<td>conserve le contenu de la RAM CMOS après une coupure de courant
+(chapitre 9)</td>
+</tr>
+<tr>
+<td>Interrupteurs DIP</td>
+<td>S1 choix du jeu (8), S2 options (6)</td>
+</tr>
+<tr>
+<td>Boutons</td>
+<td>S8 reset, S9, S33 remise à zéro de la comptabilité</td>
+</tr>
+<tr>
+<td>LED</td>
+<td>rouge « SD card error », jaune « zero cross », verte « Bally »</td>
+</tr>
+</tbody>
+</table>
+<p>Les cartes v1.0 et v1.1 diffèrent par un détail invisible : sur la
+v1.1, un CD4502 externe génère les strobes de verrouillage des
+afficheurs ; sur la v1.0, c&#39;est le FPGA lui-même qui s&#39;en charge. C&#39;est
+pourquoi les deux cartes ont besoin de programmes FPGA différents
+(chapitre 11).</p>
+<h2 id="4-réglage-des-interrupteurs-dip">4. Réglage des interrupteurs
+DIP</h2>
+<h3 id="41-banc-dip-s1--choix-du-jeu">4.1. Banc DIP S1 : choix du
+jeu</h3>
+<p>Ici, vous choisissez le jeu que SternFA doit exécuter. Cela dépend
+des ROM présentes sur la carte SD ; l&#39;annexe A liste le contenu de
+l&#39;image actuelle.</p>
+<p><strong>La position des interrupteurs est simplement le numéro du jeu
+en binaire</strong>, S1 étant le bit de poids faible :</p>
+<table>
+<thead>
+<tr>
+<th>Interrupteur</th>
+<th>S1</th>
+<th>S2</th>
+<th>S3</th>
+<th>S4</th>
+<th>S5</th>
+<th>S6</th>
+<th>S7</th>
+<th>S8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ajoute</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>8</td>
+<td>16</td>
+<td>32</td>
+<td>64</td>
+<td>128</td>
+</tr>
+</tbody>
+</table>
+<p>ON = la valeur est ajoutée. Le jeu 101 (MATAHARI) correspond donc à 1
++ 4 + 32 + 64 = S1, S3, S6 et S7 sur ON, tout le reste sur OFF. L&#39;annexe
+A détaille cela pour chaque jeu.</p>
+<p><strong>Les numéros de jeu 0 à 63 sont des jeux Stern
+MPU-200</strong> et tournent avec l&#39;horloge processeur la plus élevée. À
+partir de 64, SternFA utilise l&#39;horloge Bally / MPU-100. Cela se déduit
+uniquement du numéro de jeu (interrupteurs S7 et S8), c&#39;est pourquoi le
+DIP d&#39;option 3 existe - voir 4.2.3.</p>
+<h3 id="42-banc-dip-s2--options">4.2. Banc DIP S2 : options</h3>
+<p>Le réglage par défaut est tout sur <strong>OFF</strong>.</p>
+<blockquote>
+<p><strong>Dip4 et Dip5 ont échangé leurs places dans le logiciel
+x.06.</strong> L&#39;anti-scintillement était sur Dip4 (manuel v1.04) et se
+trouve maintenant sur Dip5. Si vous passez d&#39;une version plus ancienne
+en utilisant l&#39;anti-scintillement, déplacez cet interrupteur de 4 à
+5.</p>
+</blockquote>
+<h4 id="421-s2-dip1---émulateur-de-zero-cross">4.2.1. S2-Dip1 -&gt;
+émulateur de zero cross</h4>
+<p>Une MPU Bally/Stern a besoin d&#39;un signal « zero cross » (passage par
+zéro) pour fonctionner correctement ; ce signal provient de
+l&#39;alimentation 12 volts. Sa présence est vérifiée au démarrage.</p>
+<p>Avec Dip1 sur <strong>ON</strong>, SternFA génère lui-même le signal
+(100 Hz, soit un secteur à 50 Hz) ; pour des essais sur l&#39;établi, une
+alimentation 5 volts suffit alors. <strong>Avec un zero cross émulé, la
+temporisation est différente</strong> - à utiliser sur l&#39;établi, pas
+dans le flipper.</p>
+<h4 id="422-s2-dip2---sauvegarde-continue-du-nvram">4.2.2. S2-Dip2 -&gt;
+sauvegarde continue du nvram</h4>
+<p>SternFA enregistre le contenu du nvram (meilleurs scores et réglages
+étendus) dans une puce FRAM. Pour les essais sur l&#39;établi, Dip2 peut
+être mis sur ON ; SternFA sauvegarde alors en continu le contenu actuel
+du nvram.</p>
+<p>En jeu normal, le contenu du nvram est de toute façon sauvegardé
+automatiquement - déclenché par l&#39;interrupteur de test, le relais de fin
+de partie (game over) et le bouton de crédit.</p>
+<h4 id="423-s2-dip3---forcer-un-jeu-bally">4.2.3. S2-Dip3 -&gt; forcer
+un jeu Bally</h4>
+<p>Avec SternFA, vous pouvez aussi faire tourner tous les jeux qui
+tournent sur BallyFA, en utilisant l&#39;image SD de ROM de BallyFA. Mettez
+alors cette option sur <strong>ON</strong> - sinon tous les jeux dont le
+numéro est inférieur à 64 tourneraient avec l&#39;horloge processeur
+MPU-200, plus élevée.</p>
+<p>L&#39;image SD Stern fournie contient les jeux Stern et Bally avec la
+bonne numérotation ; avec cette image, vous n&#39;avez <strong>pas</strong>
+besoin de cette option.</p>
+<h4 id="424-s2-dip4---non-utilisé">4.2.4. S2-Dip4 -&gt; non utilisé</h4>
+<p>Sans fonction sur le matériel 1.0 et 1.1, laissez-le sur OFF. Sur le
+matériel 2.0, cet interrupteur permet à l&#39;interface de test FA-Control
+de prendre le contrôle du flipper.</p>
+<h4 id="425-s2-dip5---anti-scintillement-pour-les-jeux-à-led">4.2.5.
+S2-Dip5 -&gt; anti-scintillement pour les jeux à LED</h4>
+<p>Avec Dip5 sur <strong>ON</strong>, SternFA modifie la temporisation
+du signal zero cross. Les jeux Bally sont connus pour faire scintiller
+les ampoules de remplacement à LED ; en général, chaque LED a besoin
+d&#39;une résistance en parallèle pour y remédier. Avec cette option, les
+LED ne scintillent plus, même sans ces résistances.</p>
+<h4 id="426-s2-dip6---initialisation-du-nvram">4.2.6. S2-Dip6 -&gt;
+initialisation du nvram</h4>
+<p>Avec Dip6 sur <strong>ON</strong>, SternFA remet à zéro le nvram du
+jeu choisi au démarrage. C&#39;est utile si vous voulez effacer tout le
+contenu de la RAM, par exemple après avoir chargé un autre jeu au même
+emplacement.</p>
+<p>Remettez-le ensuite sur OFF et éteignez puis rallumez - sinon le
+flipper efface ses réglages à chaque démarrage.</p>
+<h3 id="43-les-interrupteurs-dip-ne-sont-lus-quune-fois-au-démarrage">4.3.
+Les interrupteurs DIP ne sont lus qu&#39;une fois, au démarrage</h3>
+<p>Les deux bancs - les huit de S1 et les six de S2 - sont lus
+<strong>une fois</strong>, dans les premiers instants après la mise sous
+tension, et les valeurs sont ensuite conservées jusqu&#39;au reset suivant.
+Tourner un interrupteur pendant que le flipper fonctionne ne fait
+rien.</p>
+<p>Conséquence pratique : <strong>après avoir changé un interrupteur,
+éteignez puis rallumez</strong>, ou appuyez sur le bouton de reset
+S8.</p>
+<h2 id="5-séquence-de-démarrage">5. Séquence de démarrage</h2>
+<h3 id="51-phase-1--laffichage-dinformations">5.1. Phase 1 : l&#39;affichage
+d&#39;informations</h3>
+<p>Juste après la mise sous tension - ou après un appui sur S8 - SternFA
+lit les deux bancs DIP et écrit l&#39;affichage d&#39;informations sur les
+afficheurs de votre flipper, avant que le moindre code de jeu ne
+s&#39;exécute. Il reste visible pendant les premiers clignotements de la LED
+verte :</p>
+<table>
+<thead>
+<tr>
+<th>Afficheur</th>
+<th>Montre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Joueur 1</strong></td>
+<td>la version du programme FPGA en cours, par ex. <code>4 3 0</code>.
+Le premier chiffre est la variante de carte (chapitre 11)</td>
+</tr>
+<tr>
+<td><strong>Joueur 2</strong></td>
+<td>le numéro de jeu choisi avec S1, aligné à droite. Un <code>2</code>
+tout à gauche signifie qu&#39;un jeu Stern MPU-200 a été choisi</td>
+</tr>
+<tr>
+<td><strong>Joueur 3</strong></td>
+<td><code>050963</code> - l&#39;identifiant lisy.dev des MPU à base de FPGA.
+Il est fixe et indique seulement que la liaison vers les afficheurs
+fonctionne</td>
+</tr>
+<tr>
+<td><strong>Joueur 4</strong></td>
+<td>la valeur du banc d&#39;options S2 sous forme de nombre, de 0 à 63 :
+Dip1 = 1, Dip2 = 2, Dip3 = 4, Dip4 = 8, Dip5 = 16, Dip6 = 32</td>
+</tr>
+<tr>
+<td><strong>Crédit / état</strong></td>
+<td>un compteur qui décompte 4, 3, 2, 1, 0 à chaque clignotement de la
+LED verte</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Vérifiez les joueurs 1 et 2 à chaque premier
+démarrage.</strong> Ils indiquent si le bon programme est dans le FPGA
+et si les interrupteurs de choix du jeu sont réglés comme vous le
+pensiez.</p>
+<h3 id="52-phase-2--lecture-de-la-carte-sd">5.2. Phase 2 : lecture de la
+carte SD</h3>
+<p>SternFA lit la ROM du jeu choisi sur la carte SD. En cas d&#39;échec, la
+<strong>LED rouge « SD card error »</strong> clignote d&#39;abord un code
+puis reste allumée, et un chiffre d&#39;erreur apparaît sur l&#39;afficheur
+d&#39;état :</p>
+<table>
+<thead>
+<tr>
+<th>Chiffre</th>
+<th>Signification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1</code></td>
+<td>problème général avec la carte SD - aucune donnée n&#39;a pu être lue.
+Carte absente, non écrite en mode brut, ou illisible</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>erreur de CRC : des données ont été lues, mais la somme de contrôle
+du bloc de jeu ne correspond pas. L&#39;image est endommagée, ou la carte
+n&#39;est pas fiable</td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td>pas d&#39;erreur : pas de carte SD, la ROM vient de la flash de
+configuration (x.30 et suivantes, 5.3)</td>
+</tr>
+<tr>
+<td><code>8</code></td>
+<td>pas de carte SD, et le jeu choisi n&#39;est pas dans la flash de
+configuration (x.30 et suivantes, 5.3)</td>
+</tr>
+</tbody>
+</table>
+<p>Si la lecture réussit, la LED rouge reste éteinte et aucun chiffre
+d&#39;erreur n&#39;apparaît.</p>
+<h3 id="53-fonctionnement-sans-carte-sd-x30">5.3. Fonctionnement sans
+carte SD (x.30)</h3>
+<p><strong>Nouveau avec le logiciel x.30.</strong> Quand aucune carte SD
+ne répond, SternFA charge le jeu depuis la flash de configuration
+(EPCS16) de la carte FPGA, sous le même numéro de jeu que sur la carte.
+L&#39;afficheur d&#39;état montre alors <code>4</code>.</p>
+<ul>
+<li>Pour des raisons de droits d&#39;auteur, le fichier publié normal
+<code>SternFA_&lt;version&gt;.jic</code> ne contient
+<strong>aucun</strong> jeu. Sans carte, le démarrage se termine alors
+par le chiffre <code>8</code>, et la LED rouge clignote huit fois
+rapidement, puis fait une pause. Comment les jeux arrivent dans la flash
+: chapitre 8.</li>
+<li>Une carte qui <strong>est</strong> présente mais donne une erreur de
+CRC (chiffre <code>2</code>) n&#39;est <strong>pas</strong> remplacée par la
+flash - une carte défectueuse doit rester visible.</li>
+<li>Si une carte est insérée, c&#39;est toujours elle qui a la
+priorité.</li>
+<li>Sans carte, le démarrage dure un peu plus longtemps, car SternFA
+laisse d&#39;abord sa chance à la carte.</li>
+</ul>
+<h3 id="54-phase-3--exécution-du-programme">5.4. Phase 3 : exécution du
+programme</h3>
+<p>Le contenu du nvram du jeu choisi est copié de la FRAM vers la RAM
+CMOS, et le code du jeu démarre. C&#39;est la séquence de démarrage
+Bally/Stern normale : la LED verte « Bally » clignote quelques fois, et
+quand le code tourne et que les interruptions arrivent régulièrement, la
+LED verte s&#39;allume et reste allumée.</p>
+<p>À partir de là, le flipper se comporte comme avec l&#39;original.</p>
+<h2 id="6-boutons-et-led-de-la-carte">6. Boutons et LED de la carte</h2>
+<h3 id="61-les-trois-led-détat">6.1. Les trois LED d&#39;état</h3>
+<table>
+<thead>
+<tr>
+<th>LED</th>
+<th>Signification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>rouge</strong> - SD card error</td>
+<td>éteinte est l&#39;état normal. Clignotement puis allumage fixe = la
+carte SD n&#39;a pas pu être lue, voir 5.2. Huit clignotements rapides, une
+pause, et ainsi de suite = pas de carte et le jeu n&#39;est pas dans la
+flash (5.3)</td>
+</tr>
+<tr>
+<td><strong>jaune</strong> - zero cross</td>
+<td><strong>allumée est l&#39;état normal.</strong> Elle s&#39;éteint quand le
+signal zero cross de l&#39;alimentation manque (deux fronts ou plus perdus
+d&#39;affilée). LED jaune éteinte et flipper qui ne fait rien = regardez la
+carte de redressement, pas SternFA. Avec Dip1 (émulateur de zero cross)
+sur OFF sur l&#39;établi sans 12 V, elle est naturellement éteinte</td>
+</tr>
+<tr>
+<td><strong>verte</strong> - Bally</td>
+<td>clignote pendant la séquence de démarrage du code de jeu, puis reste
+allumée pendant que le jeu tourne. Éteinte en permanence ou un
+clignotement qui ne s&#39;arrête jamais signifie que le code du jeu ne passe
+pas son initialisation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-les-boutons">6.2. Les boutons</h3>
+<table>
+<thead>
+<tr>
+<th>Bouton</th>
+<th>Fonction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>S8</strong></td>
+<td>reset. Relance toute la séquence de démarrage, y compris la lecture
+des DIP. À utiliser après avoir changé un interrupteur</td>
+</tr>
+<tr>
+<td><strong>S9</strong></td>
+<td>câblé au FPGA mais pas encore utilisé par le logiciel. L&#39;autotest du
+jeu se trouve comme d&#39;habitude dans la porte à monnaie</td>
+</tr>
+<tr>
+<td><strong>S33</strong></td>
+<td>la remise à zéro de la comptabilité S33 de la MPU d&#39;origine (elle
+déclenche la NMI). Même fonction que sur la carte d&#39;origine</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-la-carte-sd">7. La carte SD</h2>
+<p>Les ROM de jeu se trouvent sur la carte SD, et SternFA les lit à
+chaque mise sous tension. La carte est lue <strong>en mode brut</strong>
+- elle n&#39;a pas de système de fichiers. Écrivez l&#39;image téléchargée sur
+la carte avec un outil de copie brute (par exemple Win32DiskImager,
+balenaEtcher ou <code>dd</code>) ; copier simplement un fichier sur une
+carte formatée ne fonctionne pas.</p>
+<p>Chaque jeu occupe un bloc de 64 Ko sur la carte, et les blocs sont
+rangés dans l&#39;ordre des numéros de jeu de l&#39;annexe A. Le FPGA calcule la
+position uniquement à partir des interrupteurs S1 ; c&#39;est pourquoi le
+numéro de jeu et la version de l&#39;image doivent correspondre - les
+numéros de jeu de l&#39;annexe A sont ceux de l&#39;image
+<strong>v0.98</strong>.</p>
+<p>L&#39;image contient aussi une somme de contrôle par bloc de jeu. C&#39;est à
+elle que se rapporte le code d&#39;erreur <code>2</code> de 5.2 ; elle
+détecte un téléchargement endommagé ou une carte défaillante avant que
+le jeu ne commence à se comporter bizarrement.</p>
+<p>N&#39;importe quelle carte micro SD ordinaire convient. La taille n&#39;a pas
+d&#39;importance - l&#39;image est petite - mais une carte en service depuis des
+années est exactement le genre de pièce qui commence à produire l&#39;erreur
+<code>2</code>.</p>
+<h2 id="8-rom-de-jeu-dans-la-flash-du-fpga">8. ROM de jeu dans la flash
+du FPGA</h2>
+<p>Le FPGA démarre depuis une puce flash de 2 Mo (EPCS16) sur la carte
+FPGA. Le programme FPGA occupe les 512 premiers Ko ; à partir de
+l&#39;adresse 080000h, il y a de la place pour les jeux. Beaucoup de jeux
+partagent des puces ROM ; chaque bloc ROM de 2 Ko n&#39;est donc stocké
+qu&#39;une fois, précédé d&#39;un répertoire qui indique pour chaque numéro de
+jeu quels blocs lui appartiennent. Ainsi, les 204 jeux de l&#39;image de
+carte SD v0.98 y tiennent, en 598 Ko.</p>
+<p>Les ROM sont protégées par le droit d&#39;auteur et ne peuvent donc pas
+faire partie du téléchargement. Vous les y placez vous-même, à partir
+d&#39;une image de votre carte SD. Dans l&#39;arborescence source de SternFA
+(github.com/bontango/SternFA), exécutez</p>
+<pre><code>.\scripts\build.ps1 &lt;variant&gt; -RomImage &lt;image of the SD card&gt;</code></pre>
+<p>avec <code>hw1_0_cyclone_IV</code> (carte v1.0),
+<code>hw1_1_cyclone_IV</code> ou <code>hw1_1_cyclone_10</code> (carte
+v1.1) comme variante. Seuls les jeux dont la somme de contrôle est
+correcte sont repris. Cela construit le programme FPGA et le regroupe
+avec les jeux dans un seul fichier,
+<code>variants\&lt;variant&gt;\output_files\sternfa_roms.jic</code>.
+Programmez-le avec le Quartus Programmer à la place du <code>.jic</code>
+normal.</p>
+<p>Dès lors, la carte fonctionne sans carte SD. Si une carte SD est
+insérée, elle a toujours la priorité ; vous pouvez donc toujours essayer
+d&#39;autres ROM depuis une carte sans toucher à la flash. Les crédits et
+les meilleurs scores appartiennent au numéro de jeu, pas à l&#39;origine de
+la ROM - ils sont conservés quand vous passez de la carte à la
+flash.</p>
+<p><strong>Gardez ce fichier pour vous.</strong> Il contient les ROM de
+jeu et ne doit pas être diffusé.</p>
+<h2 id="9-crédits-et-meilleurs-scores">9. Crédits et meilleurs
+scores</h2>
+<p>La MPU d&#39;origine maintient sa RAM CMOS en vie avec des piles, ce qui
+finit par détruire tant de ces cartes. <strong>SternFA n&#39;a pas de
+pile.</strong> À la place, il copie le contenu du nvram dans la puce
+FRAM de la carte et le relit au démarrage suivant.</p>
+<p>Vous n&#39;avez rien à faire pour cela. La sauvegarde est déclenchée
+automatiquement par l&#39;interrupteur de test, le relais de fin de partie
+et le bouton de crédit - les mêmes événements auxquels la carte
+d&#39;origine se serait stabilisée. L&#39;option Dip2 (4.2.2) force une
+sauvegarde continue pour les essais sur l&#39;établi, et l&#39;option Dip6
+(4.2.6) efface le contenu.</p>
+<p>La FRAM n&#39;a pas besoin de pile, n&#39;a pas de limite de cycles
+d&#39;écriture dont il faille se soucier, et ne fuit pas.</p>
+<h2 id="10-programmer-le-fpga">10. Programmer le FPGA</h2>
+<p>Tout ce qu&#39;il faut pour mettre le logiciel sur la carte est décrit
+sur mon site, et c&#39;est tenu à jour là-bas :</p>
+<blockquote>
+<p><strong><a href="https://lisy.dev/documentation-01.html">https://lisy.dev/documentation-01.html</a></strong></p>
+</blockquote>
+<p>Vous y trouverez le logiciel de programmation nécessaire,
+l&#39;installation du pilote USB Blaster et la programmation du FPGA.</p>
+<p>Le programme FPGA lui-même et l&#39;image de carte SD se trouvent dans le
+dépôt logiciel SternFA :</p>
+<blockquote>
+<p><strong><a href="https://lisy.dev/swrep/SternFA">https://lisy.dev/swrep/SternFA</a></strong></p>
+</blockquote>
+<p><strong>Veillez à prendre la version de votre carte</strong> - voir
+le chapitre 11. Avec le logiciel x.30, ce sont
+<code>SternFA_130.jic</code>, <code>SternFA_330.jic</code> et
+<code>SternFA_430.jic</code>.</p>
+<p>Le FPGA de cette carte est configuré depuis une mémoire de
+configuration série, le programme reste donc en place après une coupure
+de courant. On le programme une fois, pas à chaque démarrage.</p>
+<h2 id="11-variantes-de-carte">11. Variantes de carte</h2>
+<p>Le même design fonctionne sur plusieurs cartes, et <strong>le
+programme FPGA n&#39;est pas interchangeable entre elles</strong> - le
+brochage diffère, et un mauvais programme n&#39;affichera au mieux rien et
+pilotera au pire les mauvaises broches.</p>
+<table>
+<thead>
+<tr>
+<th>La version commence par</th>
+<th>Carte</th>
+<th>Fichier x.30</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>carte SternFA v1.0 avec la carte Cyclone IV (EP4CE6E22)</td>
+<td><code>hardware v1.0/Cyclone_IV_v4/SternFA_130.jic</code></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>carte SternFA v1.1 avec la carte Cyclone IV (EP4CE6E22)</td>
+<td><code>hardware v1.1/Cyclone_IV_v4/SternFA_330.jic</code></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>carte SternFA v1.1 avec la carte Cyclone 10 (10CL006)</td>
+<td><code>hardware v1.1/Cyclone_10/SternFA_430.jic</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>carte SternFA v2.0 avec la carte <code>dev_open</code> - voir le <a href="SternFA_manuel_utilisateur.html">manuel du matériel 2.0</a></td>
+<td><code>hardware v2.0/dev_open/SternFA_530.jic</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>L&#39;affichage d&#39;informations indique quel programme tourne
+:</strong> le premier des trois chiffres de version sur l&#39;afficheur du
+joueur 1 est le numéro de carte. Si vous avez chargé le mauvais, les
+afficheurs resteront très probablement éteints ou montreront n&#39;importe
+quoi - vérifiez d&#39;abord ce chiffre.</p>
+<h2 id="12-historique-des-versions">12. Historique des versions</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Modification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x.02</td>
+<td>message de démarrage adapté</td>
+</tr>
+<tr>
+<td>x.03</td>
+<td>sortie son inversée (74HCT240) et signaux internes corrigés</td>
+</tr>
+<tr>
+<td>x.04</td>
+<td>contrôle CRC des blocs de jeu sur la carte SD ; les jeux MPU-200
+sont maintenant dans la plage 0..63</td>
+</tr>
+<tr>
+<td>x.05</td>
+<td>horloge processeur 446 / 893 kHz sur toutes les cartes (les cartes
+Cyclone IV tournaient auparavant à 500 / 833 kHz)</td>
+</tr>
+<tr>
+<td>x.06</td>
+<td><strong>options Dip4 et Dip5 échangées :</strong>
+l&#39;anti-scintillement est maintenant sur Dip5</td>
+</tr>
+<tr>
+<td><strong>x.30</strong></td>
+<td><strong>ROM de jeu depuis la flash de configuration quand aucune
+carte SD ne répond</strong> ; chiffre d&#39;état <code>4</code> = ROM depuis
+la flash, <code>8</code> = jeu absent de la flash</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-limites-connues">13. Limites connues</h2>
+<ul>
+<li><strong>Le logiciel x.30 n&#39;a pas encore été confirmé sur le matériel
+1.x</strong> - ni le repli sur la flash ni le démarrage normal depuis la
+carte SD. Si quelque chose ne va pas, revenez à
+<code>SternFA_106.jic</code>, <code>SternFA_306.jic</code> ou
+<code>SternFA_406.jic</code> et signalez ce que vous avez vu.</li>
+<li><strong>L&#39;horloge processeur a changé avec x.05</strong> sur les
+cartes Cyclone IV (1xx et 3xx), pour la valeur que la carte Cyclone 10 a
+toujours eue. Si la vitesse du jeu, la temporisation du son ou les
+afficheurs semblent différents de d&#39;habitude, c&#39;est le premier endroit à
+regarder ; <code>SternFA_103.jic</code> / <code>SternFA_304.jic</code>
+sont les dernières versions avec l&#39;ancienne horloge.</li>
+<li><strong>S9 n&#39;a pas de fonction</strong> - voir 6.2.</li>
+</ul>
+<hr />
+<h2 id="annexe-a-choix-du-jeu">Annexe A choix du jeu</h2>
+<p>Numéros de jeu de l&#39;image de carte SD <strong>v0.98</strong>. on =
+interrupteur fermé. La position est le numéro du jeu en binaire avec S1
+comme bit de poids faible, voir 4.1. Les noms de jeu et les remarques
+proviennent de l&#39;image et ne sont pas traduits : <code>Freeplay</code> =
+version en partie gratuite, <code>NOT USED</code> = aucune ROM à ce
+numéro, <code>7digit mod</code> = modifié pour afficheurs à 7 chiffres,
+<code>2 player</code>/<code>4 player</code> = nombre de joueurs.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;"><strong>N°</strong></th>
+<th><strong>S1</strong></th>
+<th><strong>S2</strong></th>
+<th><strong>S3</strong></th>
+<th><strong>S4</strong></th>
+<th><strong>S5</strong></th>
+<th><strong>S6</strong></th>
+<th><strong>S7</strong></th>
+<th><strong>S8</strong></th>
+<th><strong>Jeu</strong></th>
+<th><strong>Remarque</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Meteor</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Galaxy</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Ali</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Big Game</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Seawitch</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Cheetah</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Quicksilver</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Stargazer</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Nine Ball</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Iron Maiden</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Viper</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Dragonfist</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Cue</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Flight 2000</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Freefall</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Lightning</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Split Second</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Catacomb</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">18</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Orbitor 1</td>
+<td>Stern MPU-200</td>
+</tr>
+<tr>
+<td style="text-align: right;">19</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Meteor</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Galaxy</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">21</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Ali</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Big Game</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Seawitch</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">24</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Cheetah</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Quicksilver</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">26</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Stargazer</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Nine Ball</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">28</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Iron Maiden</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Viper</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Dragonfist</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">31</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>Cue</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Flight 2000</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Freefall</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Lightning</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Split Second</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Catacomb</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>Orbitor 1</td>
+<td>Stern MPU-200 Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">40</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">41</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">43</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">46</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">47</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">48</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">49</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">51</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">52</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">53</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">54</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">55</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">56</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">57</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">58</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">59</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">60</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">61</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">62</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">63</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">64</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Pinball</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">65</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Stingray</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">66</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Stars</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">67</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Memory Lane</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">68</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Lectronamo</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">69</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Wild Fyre</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">70</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Nugent</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">71</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Dracula</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">72</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Trident</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">73</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Hot Hand</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">74</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Magic</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">75</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Cosmic Princess</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">76</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Pinball</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">77</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Stingray</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">78</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Stars</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">79</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Memory Lane</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">80</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Lectronamo</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">81</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Wild Fyre</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">82</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Nugent</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">83</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Dracula</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">84</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Trident</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">85</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Hot Hand</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">86</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Magic</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">87</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>Cosmic Princess</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">88</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">89</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">90</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">91</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">92</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">93</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">94</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">95</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>NOT USED</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">96</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>FREEDOM</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">97</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>NIGHTRIDER</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">98</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>EVELKNIEVEL</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">99</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>EIGHTBALL</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>POWERPLAY</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">101</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>MATAHARI</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">102</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>BLACKJACK</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">103</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>STRIKES_SPARES</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">104</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>LOSTWORLD</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">105</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>6MILLIONMAN</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">106</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>PLAYBOY</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">107</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>VOLTAN</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">108</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>SUPERSONIC</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">109</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>STARTREK</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">110</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>KISS</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">111</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>PARAGON</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">112</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>HARLEMGLOBE</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">113</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>DOLLYPARTON</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">114</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>FUTURESPA</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">115</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>NITROGROUND</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">116</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>SILVERBALLMANIA</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">117</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>SPACEINVADERS</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">118</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>ROLLINGSTONES</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">119</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>MYSTIC</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">120</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>HOTDOGGIN</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">121</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>VIKING</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">122</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>SKATEBALL</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">123</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>FRONTIER</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">124</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>XENON</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">125</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>FLASHGORDON</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">126</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>8BALLDELUXE</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">127</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>FIREBALLII</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">128</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>EMRYRON</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">129</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>FATHOM</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">130</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>MEDUSA</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">131</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>CENTAUR</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">132</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>ELEKTRA</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">133</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>VECTOR</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">134</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>MR_MRSPACMAN</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">135</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>SPECTRUM</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">136</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>SPEAKEASY</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">137</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>BMX</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">138</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>GRANDSLAM</td>
+<td>Bally 2 player</td>
+</tr>
+<tr>
+<td style="text-align: right;">139</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>GOLDBALL</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">140</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>XandOs</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">141</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>SPYHUNTER</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">142</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>KINGSOFSTEEL</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">143</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>BLACKPYRAMID</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">144</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>FIREBALCLASSIC</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">145</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>CYBERNAUT</td>
+<td>Bally</td>
+</tr>
+<tr>
+<td style="text-align: right;">146</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>NIGHTRIDER</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">147</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>EVELKNIEVEL</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">148</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>EIGHTBALL</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">149</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>POWERPLAY</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">150</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>MATAHARI</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">151</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>BLACKJACK</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">152</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>STRIKES_SPARES</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">153</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>LOSTWORLD</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">154</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>6MILLIONMAN</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">155</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>PLAYBOY</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">156</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>VOLTAN</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">157</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>SUPERSONIC</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">158</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>STARTREK</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">159</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>KISS</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">160</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>PARAGON</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">161</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>HARLEMGLOBE</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">162</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>DOLLYPARTON</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">163</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>FUTURESPA</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">164</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>NITROGROUND</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">165</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SILVERBALLMANIA</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">166</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SPACEINVADERS</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">167</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>ROLLINGSTONES</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">168</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>MYSTIC</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">169</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>HOTDOGGIN</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">170</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>VIKING</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">171</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SKATEBALL</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">172</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>FRONTIER</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">173</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>XENON</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">174</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>FLASHGORDON</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">175</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>8BALLDELUXE</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">176</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>FIREBALLII</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">177</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>EMRYRON</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">178</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>FATHOM</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">179</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>MEDUSA</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">180</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>CENTAUR</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">181</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>ELEKTRA</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">182</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>VECTOR</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">183</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>MR_MRSPACMAN</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">184</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SPECTRUM</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">185</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SPEAKEASY</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">186</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>BMX</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">187</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>GOLDBALL</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">188</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>XandOs</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">189</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>SPYHUNTER</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">190</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>KINGSOFSTEEL</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">191</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>BLACKPYRAMID</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">192</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>FIREBALCLASSIC</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">193</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>CYBERNAUT</td>
+<td>Bally Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">194</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>6MILLIONMAN</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">195</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>PLAYBOY</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">196</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>VOLTAN</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">197</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>SUPERSONIC</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">198</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>STARTREK</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">199</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>KISS</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">200</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>PARAGON</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">201</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>HARLEMGLOBE</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">202</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>DOLLYPARTON</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">203</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>FUTURESPA</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">204</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>NITROGROUND</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">205</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>SILVERBALLMANIA</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">206</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>SPACEINVADERS</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">207</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>ROLLINGSTONES</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">208</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>MYSTIC</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">209</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>HOTDOGGIN</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">210</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>VIKING</td>
+<td>Bally 7digit mod</td>
+</tr>
+<tr>
+<td style="text-align: right;">211</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>8BALLDELUXE</td>
+<td>Special</td>
+</tr>
+<tr>
+<td style="text-align: right;">212</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>EMBRYON</td>
+<td>Special</td>
+</tr>
+<tr>
+<td style="text-align: right;">213</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>VECTOR</td>
+<td>Special</td>
+</tr>
+<tr>
+<td style="text-align: right;">214</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>FATHOM</td>
+<td>Special</td>
+</tr>
+<tr>
+<td style="text-align: right;">215</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>NITROGROUND</td>
+<td>Special w. Sirene Patch</td>
+</tr>
+<tr>
+<td style="text-align: right;">216</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Pinball</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">217</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Stingray</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">218</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Stars</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">219</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Memory Lane</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">220</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Pinball</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">221</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Stingray</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">222</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Stars</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">223</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>Memory Lane</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">224</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Tigerrag</td>
+<td>Bell Games</td>
+</tr>
+<tr>
+<td style="text-align: right;">225</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>8BALLDELUXE</td>
+<td>V32</td>
+</tr>
+<tr>
+<td style="text-align: right;">226</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>SPEAKEASY 4Player</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">227</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>SPEAKEASY 4Player</td>
+<td>Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">228</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Saturn2</td>
+<td>Bell Games</td>
+</tr>
+<tr>
+<td style="text-align: right;">229</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Lectronamo</td>
+<td>Stern</td>
+</tr>
+<tr>
+<td style="text-align: right;">230</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Lectronamo</td>
+<td>Stern Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">231</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>World Defender</td>
+<td>Bell Games</td>
+</tr>
+<tr>
+<td style="text-align: right;">232</td>
+<td>off</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>World Defender</td>
+<td>Bell Games Freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">233</td>
+<td>on</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Baby Pacman</td>
+<td>–</td>
+</tr>
+<tr>
+<td style="text-align: right;">234</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>Baby Pacman</td>
+<td>Okaegi version</td>
+</tr>
+<tr>
+<td style="text-align: right;">235</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>GRANDSLAM</td>
+<td>4 player</td>
+</tr>
+<tr>
+<td style="text-align: right;">236</td>
+<td>off</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>GRANDSLAM</td>
+<td>2 player freeplay</td>
+</tr>
+<tr>
+<td style="text-align: right;">237</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>off</td>
+<td>on</td>
+<td>on</td>
+<td>on</td>
+<td>GRANDSLAM</td>
+<td>4 player freeplay</td>
+</tr>
+</tbody>
+</table>
+<h2 id="annexe-b-aide-mémoire">Annexe B aide-mémoire</h2>
+<p><strong>Les 14 interrupteurs de configuration de SternFA</strong></p>
+<pre><code> S1  choix du jeu                      S2  options
+  1  + 1                                1  émulateur de zero cross
+  2  + 2                                2  sauvegarde continue du nvram
+  3  + 4                                3  forcer l&#39;horloge Bally
+  4  + 8                                4  non utilisé (HW 1.x)
+  5  + 16                               5  anti-scintillement pour LED (Dip4 jusqu&#39;à x.05)
+  6  + 32                               6  init du nvram au démarrage
+  7  + 64
+  8  + 128                             par défaut : tout sur OFF
+
+ les deux bancs sont lus UNE FOIS, au démarrage - après tout changement : éteindre, rallumer, ou S8</code></pre>
+<p><strong>L&#39;affichage d&#39;informations, les premières secondes après la
+mise sous tension</strong></p>
+<pre><code>Joueur 1      4 3 0     version, premier chiffre = variante de carte (chapitre 11)
+Joueur 2   2    1 0 1    choix du jeu ; 2 en tête = horloge Stern MPU-200
+Joueur 3   0 5 0 9 6 3   identifiant lisy.dev, fixe
+Joueur 4        1 6      valeur du banc d&#39;options S2 (Dip1=1 ... Dip6=32)
+Crédit              4    décompte 4, 3, 2, 1, 0</code></pre>
+<p><strong>LED :</strong> rouge SD card error (éteinte = bon) · jaune
+zero cross (<strong>allumée = bon</strong>) · verte Bally (clignote au
+démarrage, puis allumée pendant que le jeu tourne)</p>
+<p><strong>Chiffre d&#39;erreur de carte SD sur l&#39;afficheur d&#39;état
+:</strong> <code>1</code> = carte illisible · <code>2</code> = somme de
+contrôle du bloc de jeu fausse · <code>4</code> = ROM depuis la flash de
+configuration, pas de carte (pas d&#39;erreur) · <code>8</code> = pas de
+carte, jeu absent de la flash</p>
+<p><strong>Boutons :</strong> S8 reset · S33 remise à zéro de la
+comptabilité · S9 sans fonction</p>
+<p><strong>Programme FPGA :</strong> <code>SternFA_1xx</code> carte v1.0
+· <code>SternFA_3xx</code> carte v1.1 Cyclone IV ·
+<code>SternFA_4xx</code> carte v1.1 Cyclone 10</p>
+</body>
+</html>
