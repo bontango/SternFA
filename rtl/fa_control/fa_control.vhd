@@ -93,6 +93,19 @@
 -- unbekannte Opcode mit 0x00 -- der Host liest daraus "Monitor nicht vorhanden".
 -- mon_rd/mon_idx melden je gesendetem Byte dessen Index, damit das Top-Level
 -- Merkbits (kurze Spulenpulse) genau beim Abholen loeschen kann.
+--
+-- ---------------------------------------------------------------------------
+-- SCHALTER SIMULIEREN (Opcode 111, Erweiterung von FA-Control)
+-- ---------------------------------------------------------------------------
+-- Im Monitor-Modus, das Spiel laeuft. Parameter: Bit 6..0 = Schalter, Bit 7 = 1
+-- schliesst, 0 gibt frei. Keine Antwort. sim_sw ('1' = geschlossen) legt das
+-- Top-Level dem Spiel auf die Schalter-Returns; das Spiel reagiert also wirklich.
+-- Wirkt nur mit ctrl_allow und ohne Uebernahme. Alles wird wieder frei, sobald eine
+-- der Bedingungen wegfaellt oder WD_TIMEOUT_MS lang kein Byte ankam: die Monitor-
+-- Abfragen des Hosts (alle 500 ms) halten das wach, schliesst jemand die Seite,
+-- bleibt kein Schalter haengen. Ohne HAS_SIM_SW (Default) ist Opcode 111 unbekannt und
+-- hat keinen Parameter. Der Host sendet ihn deshalb nur, wenn das Top-Level die
+-- Faehigkeit meldet (Bit 3 des Flag-Bytes, TECHNICAL_REFERENCE.md).
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -137,7 +150,9 @@ entity fa_control is
 		-- zu Kopien kompatibel, die game_info noch vierbittig anschliessen (AtariFA).
 		GAME_DIGITS  : integer := 1;
 		-- Laenge der Monitor-Antwort (Opcode 110) ohne Laengenbyte. 0 = kein Monitor.
-		MON_BYTES    : integer := 0
+		MON_BYTES    : integer := 0;
+		-- Opcode 111 (Schalter simulieren) vorhanden. false = wie unbekannt.
+		HAS_SIM_SW   : boolean := false
 	);
 	port (
 		clk         : in  std_logic;                        -- 50 MHz
@@ -169,7 +184,9 @@ entity fa_control is
 		-- Byte 0 ist ungenutzt (an seiner Stelle geht die Laenge raus).
 		mon_data    : in  std_logic_vector(8 * MON_BYTES + 7 downto 0) := (others => '0');
 		mon_rd      : out std_logic;                        -- 1 Takt je gesendetem Byte
-		mon_idx     : out integer range 0 to 255            -- dessen Index k
+		mon_idx     : out integer range 0 to 255;           -- dessen Index k
+		-- Opcode 111: '1' = dem Spiel als geschlossen vorspielen
+		sim_sw      : out std_logic_vector(MAX_SW - 1 downto 0)
 	);
 end fa_control;
 
@@ -207,6 +224,7 @@ architecture rtl of fa_control is
 	constant OP_WATCHDOG       : integer := 101;  -- -> Byte 0
 	constant OP_BACK_READY     : integer := 102;  -- -> Byte 0
 	constant OP_G_MONITOR      : integer := 110;  -- -> Laenge + Daten, s. Kopf "MONITOR"
+	constant OP_S_SIM_SW       : integer := 111;  -- Nr + Bit 7 = zu, s. Kopf "SCHALTER"
 
 	constant SW_NO_CHANGE : std_logic_vector(7 downto 0) := x"7F";  -- 127
 
@@ -300,6 +318,7 @@ architecture rtl of fa_control is
 	signal req_meta : std_logic := '1';
 	signal req_sync : std_logic := '1';   -- 2-FF-Synchronizer auf ctrl_req
 	signal ctrl_r   : std_logic := '0';
+	signal sim_r    : std_logic_vector(MAX_SW - 1 downto 0) := (others => '0');
 	signal wd_cnt   : integer range 0 to WD_MAX := 0;
 
 	-- ---------------------------------------------------------------------
@@ -349,6 +368,7 @@ begin
 
 	ctrl_active <= ctrl_r;
 	lamp_ovr    <= lamp_r;
+	sim_sw      <= sim_r;
 	sol_ovr     <= sol_r;
 	disp_ovr    <= disp_r;
 	snd_ovr     <= snd_r;
@@ -442,6 +462,7 @@ begin
 				tx_idx     <= 0;
 				tx_src     <= SRC_NONE;
 				ctrl_r     <= '0';
+				sim_r      <= (others => '0');
 				wd_cnt     <= 0;
 				req_meta   <= '1';
 				req_sync   <= '1';
@@ -496,6 +517,12 @@ begin
 					end if;
 				end if;
 
+				-- ---- Simulierte Schalter: gleiche Totmannschaltung wie die Uebernahme ----
+				if ctrl_r = '1' or ctrl_allow = '0'
+				   or ((WD_TIMEOUT_MS > 0) and (wd_cnt >= WD_TIMEOUT_MS)) then
+					sim_r <= (others => '0');
+				end if;
+
 				-- ---- Spulenpuls auslaufen lassen (vor der FSM, damit ein neuer
 				--      Befehl im selben Takt gewinnt) ----
 				if pulse_run = '1' and ms_tick = '1' then
@@ -537,6 +564,12 @@ begin
 									state <= S_PAR1;
 								when OP_S_DISP_FIRST to OP_S_DISP_LAST =>
 									state <= S_PAR1;   -- par1 = Anzahl Ziffern
+								when OP_S_SIM_SW =>
+									if HAS_SIM_SW then
+										state <= S_PAR1;
+									else
+										state <= S_EXEC;
+									end if;
 								when others =>
 									state <= S_EXEC;
 							end case;
@@ -746,6 +779,18 @@ begin
 									tx_src <= SRC_MON;  tx_len <= MON_BYTES + 1;
 								else
 									tx_b0 <= x"00";     tx_len <= 1;   -- wie unbekannt
+								end if;
+
+							-- ---- Schalter simulieren: nur im Monitor-Betrieb, keine Antwort ----
+							when OP_S_SIM_SW =>
+								if not HAS_SIM_SW then
+									tx_b0 <= x"00";  tx_len <= 1;      -- wie unbekannt
+								elsif ctrl_r = '0' and ctrl_allow = '1' and (par1 mod 128) < N_SW then
+									if par1 >= 128 then
+										sim_r(par1 mod 128) <= '1';
+									else
+										sim_r(par1 mod 128) <= '0';
+									end if;
 								end if;
 
 							when others =>

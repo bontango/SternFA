@@ -230,6 +230,8 @@ signal pia_U10_cs		:	std_logic;
 --------------------
 signal pia_U10_pa_o	: 	std_logic_vector(7 downto 0);
 signal pia_U10_pb_i	:  std_logic_vector(7 downto 0);
+signal pia_U10_pb_raw	:  std_logic_vector(7 downto 0);
+signal fa_sim_col	:  std_logic_vector(7 downto 0);	-- simulated switches of the strobed column
 signal pia_U10_ca2_o	:  std_logic;
 signal pia_U10_cb2_o	:  std_logic;
 
@@ -802,9 +804,11 @@ DISP_BLANKING <= fa_blanking when fa_ctrl_active = '1'
 META2: entity work.Cross_Slow_To_Fast_Clock_Bus
 port map(
    i_D => not U10_PB,
-	o_Q => pia_U10_pb_i,
+	o_Q => pia_U10_pb_raw,
    i_Fast_Clk => cpu_clk
 	);
+-- FA-Control can close switches for the running game; '0' on boards without it.
+pia_U10_pb_i <= pia_U10_pb_raw or fa_sim_col;
 
 ----------------------
 -- Lamps
@@ -1122,6 +1126,7 @@ gen_fa_control: if HAS_ESP32 generate
 	-- (fa_connect_monitor_len):
 	--   1      flags: bit0 CPU running (reset_l), bit1 FA control active.
 	--          bit2 (attract mode) stays 0 - nothing on the pins tells.
+	--          bit3 switches can be simulated (opcode 111, option DIP 4 is ON)
 	--   2..9   lamps 0..59, LSB of byte 2 = lamp 0
 	--   10..12 coils 1..19 now (bit0 = coil 1)
 	--   13..15 coils seen since the byte was last read (cleared when sent)
@@ -1153,6 +1158,7 @@ gen_fa_control: if HAS_ESP32 generate
 	signal mon_sol_x    : std_logic_vector(23 downto 0) := (others => '0');
 	signal mon_sw_game  : std_logic_vector(FA_N_SW - 1 downto 0) := (others => '0');
 	signal mon_sw       : std_logic_vector(FA_N_SW - 1 downto 0);
+	signal fa_sim_sw    : std_logic_vector(FA_N_SW - 1 downto 0);
 	signal mon_dig_d    : std_logic_vector(5 downto 0) := (others => '0');
 	signal mon_latch    : mon_nib_t  := (others => x"F");
 	signal mon_disp     : mon_disp_t := (others => x"FFFFFF");
@@ -1211,7 +1217,8 @@ generic map(
 	MAX_SOL      => FA_N_SOL,
 	MAX_SW       => FA_N_SW,
 	MAX_DIGITS   => FA_DIGITS,
-	MON_BYTES    => FA_MON_BYTES
+	MON_BYTES    => FA_MON_BYTES,
+	HAS_SIM_SW   => true
 	)
 port map(
 	clk         => clk_50,
@@ -1235,7 +1242,8 @@ port map(
 	snd_en      => open,
 	mon_data    => mon_data,
 	mon_rd      => mon_rd,
-	mon_idx     => mon_idx
+	mon_idx     => mon_idx,
+	sim_sw      => fa_sim_sw
 	);
 
 ------------------------------------------------------------------------------
@@ -1401,6 +1409,22 @@ end process;
 
 mon_sw <= fa_sw_state when fa_ctrl_active = '1' else mon_sw_game;
 
+-- Simulated switches (opcode 111): laid over the returns of the column the game is
+-- strobing, ORed in front of the PIA, so they can only close and never hide a real
+-- switch. Same conditions as MON_SWITCHES - a DIP read must not see them. The monitor
+-- reads pia_U10_pb_i and therefore shows them as well.
+MON_SIM_COL: process(fa_sim_sw, pia_U10_pa_o, pia_U10_cb2_o)
+begin
+	fa_sim_col <= (others => '0');
+	if pia_U10_pa_o(7 downto 5) = "000" and pia_U10_cb2_o = '0' then
+		for s in 0 to 4 loop
+			if pia_U10_pa_o(4 downto 0) = std_logic_vector(to_unsigned(2 ** s, 5)) then
+				fa_sim_col <= fa_sim_sw(8 * s + 7 downto 8 * s);
+			end if;
+		end loop;
+	end if;
+end process;
+
 -- Displays: while U10_CA2 = '0' the CD4502 passes the latch strobes, active low
 -- at the pin: U10_PA(3..0) = player 1..4, U11_PA(0) = status. A strobed display
 -- latch follows the BCD digit on U10_PA(7..4). What a digit shows is what the
@@ -1435,7 +1459,7 @@ begin
 end process;
 
 mon_data(7 downto 0)     <= x"00";		-- byte 0 is the length, sent by fa_control
-mon_data(15 downto 8)    <= "000000" & fa_ctrl_active & reset_l;
+mon_data(15 downto 8)    <= "0000" & (not game_option(4)) & '0' & fa_ctrl_active & reset_l;
 mon_data(79 downto 16)   <= "0000" & mon_lamps;
 mon_data(103 downto 80)  <= mon_sol;
 mon_data(127 downto 104) <= mon_sol_x;
@@ -1463,6 +1487,7 @@ end generate;
 ------------------------------------------------------------------------------
 gen_no_fa_control: if not HAS_ESP32 generate
 	fa_ctrl_active <= '0';
+	fa_sim_col     <= (others => '0');
 	ESP32_ser_rx   <= '1';
 	-- no ESP, no ROM from it: SD_Card starts right after the dip scan as it always did
 	esp_rom_busy   <= '0';
