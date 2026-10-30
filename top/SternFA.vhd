@@ -109,21 +109,23 @@ entity SternFA is
 		S33			:	in 	std_logic; -- (4049 IC8)
 		
 		-- U10 PIA
-		U10_PA		:	out 	std_logic_vector(7 downto 0):= "ZZZZZZZZ";
+		-- U10_PA, U10_CB2, U11_PA, U11_CB2 are buffer, not out: the FA-Control monitor
+		-- reads back what the driver boards get (HW 2.0 only, see gen_fa_control).
+		U10_PA		:	buffer 	std_logic_vector(7 downto 0):= "ZZZZZZZZ";
 		U10_PB		:	in 	std_logic_vector(7 downto 0):= "ZZZZZZZZ"; --(4049 IC7 & IC8)
 		U10_CA1		:	in 	std_logic; -- (4049 IC8)
 		-- Inhibit of the external CD4502 from PCB v1.10 on. VIRTUAL_PIN on v1.00,
 		-- where the strobes are made inside the FPGA - but still driven, and still
 		-- read by DISP_BLANKING, so the behaviour is the same on both.
 		U10_CA2		:	buffer 	std_logic; --display logic internal
-		U10_CB2		:	out 	std_logic:= 'Z';
+		U10_CB2		:	buffer 	std_logic:= 'Z';
 		
 		-- U11 PIA
-		U11_PA		:	out 	std_logic_vector(7 downto 0):= "ZZZZZZZZ"; 
+		U11_PA		:	buffer 	std_logic_vector(7 downto 0):= "ZZZZZZZZ"; 
 		U11_PB		:	buffer 	std_logic_vector(7 downto 0):= "ZZZZ1111";
 		U11_CA2		:	out 	std_logic:= 'Z';
 		U11_CB1		:	in 	std_logic;		-- (4049 IC8)
-		U11_CB2		:	out 	std_logic:= '1';
+		U11_CB2		:	buffer 	std_logic:= '1';
 		
 		-- J5 Stern Soundboard
 		SB_out_D	:	out 	std_logic_vector(7 downto 0);
@@ -1115,6 +1117,48 @@ SB_A12	<= not cpu_addr(12);
 ------------------------------------------------------------------------------
 gen_fa_control: if HAS_ESP32 generate
 
+	-- Monitor (opcode 110), byte k of the answer = mon_data(8k+7 downto 8k). The
+	-- length follows from the counts FAC reports, FA-Control checks it
+	-- (fa_connect_monitor_len):
+	--   1      flags: bit0 CPU running (reset_l), bit1 FA control active.
+	--          bit2 (attract mode) stays 0 - nothing on the pins tells.
+	--   2..9   lamps 0..59, LSB of byte 2 = lamp 0
+	--   10..12 coils 1..19 now (bit0 = coil 1)
+	--   13..15 coils seen since the byte was last read (cleared when sent)
+	--   16     sound lines: 0. The SB-300 sits on the CPU bus, N_SOUNDS is 0.
+	--   17..21 switches 0..39 (strobe * 8 + return)
+	--   22..36 displays in LISY order (0 = status, 1..4 = player), 6 digits each,
+	--          two BCD digits per byte, left digit in the high nibble; >= 0xA = dark
+	-- SternFA has no lamp or coil matrix inside, everything leaves as raw PIA pins.
+	-- So the monitor reads the pins back and decodes them the other way round from
+	-- fa_io_bally - behind the muxes, i.e. game, boot message and FA control alike.
+	constant FA_MON_BYTES : integer := 36;
+	constant MON_WIN      : integer := 1048575;	-- lamp window, 2^20 x 20 ns = 21 ms
+	type mon_nib_t  is array (0 to 4) of std_logic_vector(3 downto 0);
+	type mon_disp_t is array (0 to 4) of std_logic_vector(23 downto 0);
+	signal mon_data     : std_logic_vector(8 * FA_MON_BYTES + 7 downto 0);
+	signal mon_rd       : std_logic;
+	signal mon_idx      : integer range 0 to 255;
+	-- pins, sampled twice on clk_50; a value counts when both samples agree:
+	-- 26 = U11_CB2, 25 = U10_CB2, 24 = U10_CA2, 23..16 U11_PB, 15..8 U11_PA, 7..0 U10_PA
+	signal mon_pin_q    : std_logic_vector(26 downto 0) := (others => '1');
+	signal mon_pin_qq   : std_logic_vector(26 downto 0) := (others => '1');
+	signal mon_pin      : std_logic_vector(26 downto 0) := (others => '1');
+	signal mon_cb2_d    : std_logic := '1';
+	signal mon_lamp_adr : std_logic_vector(3 downto 0) := "1111";
+	signal mon_lamp_acc : std_logic_vector(FA_N_LAMPS - 1 downto 0) := (others => '0');
+	signal mon_lamps    : std_logic_vector(FA_N_LAMPS - 1 downto 0) := (others => '0');
+	signal mon_win_cnt  : integer range 0 to MON_WIN := 0;
+	signal mon_sol      : std_logic_vector(23 downto 0) := (others => '0');
+	signal mon_sol_x    : std_logic_vector(23 downto 0) := (others => '0');
+	signal mon_sw_game  : std_logic_vector(FA_N_SW - 1 downto 0) := (others => '0');
+	signal mon_sw       : std_logic_vector(FA_N_SW - 1 downto 0);
+	signal mon_dig_d    : std_logic_vector(5 downto 0) := (others => '0');
+	signal mon_latch    : mon_nib_t  := (others => x"F");
+	signal mon_disp     : mon_disp_t := (others => x"FFFFFF");
+
+begin
+
 ------------------------------------------------------------------------------
 -- Game ROM from the ESP32 (rtl/fa_control/esp_rom_loader.vhd). Runs right after
 -- the dip scan - the same moment U1 hands GS_DIPS over to the ESP - and before any
@@ -1166,7 +1210,8 @@ generic map(
 	MAX_LAMPS    => FA_N_LAMPS,
 	MAX_SOL      => FA_N_SOL,
 	MAX_SW       => FA_N_SW,
-	MAX_DIGITS   => FA_DIGITS
+	MAX_DIGITS   => FA_DIGITS,
+	MON_BYTES    => FA_MON_BYTES
 	)
 port map(
 	clk         => clk_50,
@@ -1187,7 +1232,10 @@ port map(
 	-- SternFA reports 0 sounds (see N_SOUNDS above): opcodes 50/51 are accepted
 	-- without effect, the SB-300 stays on the halted CPU bus.
 	snd_ovr     => open,
-	snd_en      => open
+	snd_en      => open,
+	mon_data    => mon_data,
+	mon_rd      => mon_rd,
+	mon_idx     => mon_idx
 	);
 
 ------------------------------------------------------------------------------
@@ -1247,6 +1295,158 @@ begin
 		fa_display4(1 + i) <= fa_disp_ovr(4 * FA_DIGITS + i);
 	end loop;
 end process;
+
+------------------------------------------------------------------------------
+-- Monitor: the machine as it is, read without control and without touching it.
+-- Pin meaning as in the head of fa_io_bally.vhd (PinMAME by35.c).
+------------------------------------------------------------------------------
+-- The pins change on cpu_clk, clk_500KHz or the DIP scan clock. Sample twice and
+-- take a value only when both samples agree.
+MON_SAMPLE: process(clk_50)
+begin
+	if rising_edge(clk_50) then
+		mon_pin_q  <= U11_CB2 & U10_CB2 & U10_CA2 & U11_PB & U11_PA & U10_PA;
+		mon_pin_qq <= mon_pin_q;
+		if mon_pin_q = mon_pin_qq then
+			mon_pin <= mon_pin_qq;
+		end if;
+	end if;
+end process;
+
+-- Lamps: the falling edge of U10_CB2 latches the address U10_PA(3..0) into the
+-- 4514; the data bits U10_PA(7..4), active low, then fire lamp adr + 15 * bit.
+-- Address 15 is "no lamp" - parked there while U10_PA carries display data.
+-- The game only pulses each address once per zero cross, so a lamp counts as on
+-- when it was fired anywhere in a 21 ms window (two half waves at 50 Hz), like
+-- by35.c ORs into its lamp matrix. The second board (U11_CA2, lamps 60+) is not
+-- monitored, FAC reports 60 lamps.
+-- HW-TUNABLE: bit order as lamp_data in fa_io_bally.
+MON_LAMP_SHADOW: process(clk_50)
+	variable adr : integer range 0 to 15;
+begin
+	if rising_edge(clk_50) then
+		mon_cb2_d <= mon_pin(25);
+		if boot_phase(1) = '0' then		-- U10_CB2 is a DIP strobe until then
+			mon_lamp_adr <= "1111";
+		elsif mon_cb2_d = '1' and mon_pin(25) = '0' then
+			mon_lamp_adr <= mon_pin(3 downto 0);
+		end if;
+		adr := to_integer(unsigned(mon_lamp_adr));
+		if mon_win_cnt = MON_WIN then
+			mon_win_cnt  <= 0;
+			mon_lamps    <= mon_lamp_acc;
+			mon_lamp_acc <= (others => '0');
+		else
+			mon_win_cnt <= mon_win_cnt + 1;
+			for a in 0 to 14 loop
+				if adr = a then
+					for b in 0 to 3 loop
+						if mon_pin(4 + b) = '0' then
+							mon_lamp_acc(a + 15 * b) <= '1';
+						end if;
+					end loop;
+				end if;
+			end loop;
+		end if;
+	end if;
+end process;
+
+-- Coils: U11_PB(3..0) = coil 1..15 as 0..14 (15 = none) while U11_CB2 = '0'
+-- selects the coil bank - with '1' the same lines are sound data. U11_PB(7..4) =
+-- coils 16..19, active low. Before boot_phase(1) these pins are DIP strobes.
+-- Pulses last milliseconds, the host asks every 500 ms: keep every pulse until
+-- its byte has gone out. Setting wins over clearing.
+MON_COILS: process(clk_50)
+begin
+	if rising_edge(clk_50) then
+		mon_sol <= (others => '0');
+		if boot_phase(1) = '1' then
+			for i in 0 to 14 loop
+				if mon_pin(26) = '0' and to_integer(unsigned(mon_pin(19 downto 16))) = i then
+					mon_sol(i) <= '1';
+				end if;
+			end loop;
+			for k in 0 to 3 loop
+				mon_sol(15 + k) <= not mon_pin(20 + k);
+			end loop;
+		end if;
+		for j in 0 to 2 loop
+			if mon_rd = '1' and mon_idx = 13 + j then
+				mon_sol_x(8 * j + 7 downto 8 * j) <= mon_sol(8 * j + 7 downto 8 * j);
+			else
+				mon_sol_x(8 * j + 7 downto 8 * j) <= mon_sol_x(8 * j + 7 downto 8 * j)
+				                                    or mon_sol(8 * j + 7 downto 8 * j);
+			end if;
+		end loop;
+	end if;
+end process;
+
+-- Switches: taken whenever the game reads U10 port B with one switch strobe set
+-- in U10_PA(4..0). The conditions are those of by35.c pia0b_r: U10_PA(7..5) and
+-- U10_CB2 set would be a DIP read. Under FA control the CPU is halted and
+-- fa_io_bally scans the matrix itself (and clears its copy when it lets go).
+MON_SWITCHES: process(cpu_clk)
+begin
+	if rising_edge(cpu_clk) then
+		if pia_U10_cs = '1' and cpu_rw = '1' and cpu_addr(1 downto 0) = "10"
+		   and pia_U10_pa_o(7 downto 5) = "000" and pia_U10_cb2_o = '0' then
+			for s in 0 to 4 loop
+				if pia_U10_pa_o(4 downto 0) = std_logic_vector(to_unsigned(2 ** s, 5)) then
+					mon_sw_game(8 * s + 7 downto 8 * s) <= pia_U10_pb_i;	-- '1' = closed
+				end if;
+			end loop;
+		end if;
+	end if;
+end process;
+
+mon_sw <= fa_sw_state when fa_ctrl_active = '1' else mon_sw_game;
+
+-- Displays: while U10_CA2 = '0' the CD4502 passes the latch strobes, active low
+-- at the pin: U10_PA(3..0) = player 1..4, U11_PA(0) = status. A strobed display
+-- latch follows the BCD digit on U10_PA(7..4). What a digit shows is what the
+-- latch holds while its enable U11_PA(2..7) (digit 1 = left .. 6) is on, so it
+-- is taken when that enable goes off again - that works whether the game strobes
+-- before or after switching the enable.
+-- HW-TUNABLE: digit order as in fa_disp_map / fa_io_bally.
+MON_DISPLAYS: process(clk_50)
+begin
+	if rising_edge(clk_50) then
+		if mon_pin(24) = '0' then
+			for k in 0 to 3 loop
+				if mon_pin(k) = '0' then
+					mon_latch(k + 1) <= mon_pin(7 downto 4);
+				end if;
+			end loop;
+			if mon_pin(8) = '0' then
+				mon_latch(0) <= mon_pin(7 downto 4);
+			end if;
+		end if;
+		mon_dig_d <= mon_pin(15 downto 10);
+		if mon_pin(15 downto 10) /= mon_dig_d then
+			for d in 0 to 5 loop
+				if mon_dig_d = std_logic_vector(to_unsigned(2 ** d, 6)) then
+					for l in 0 to 4 loop
+						mon_disp(l)(23 - 4 * d downto 20 - 4 * d) <= mon_latch(l);
+					end loop;
+				end if;
+			end loop;
+		end if;
+	end if;
+end process;
+
+mon_data(7 downto 0)     <= x"00";		-- byte 0 is the length, sent by fa_control
+mon_data(15 downto 8)    <= "000000" & fa_ctrl_active & reset_l;
+mon_data(79 downto 16)   <= "0000" & mon_lamps;
+mon_data(103 downto 80)  <= mon_sol;
+mon_data(127 downto 104) <= mon_sol_x;
+mon_data(135 downto 128) <= x"00";
+mon_data(175 downto 136) <= mon_sw;
+
+-- three bytes per display, the left digit pair first
+mon_disp_bytes: for l in 0 to 4 generate
+	mon_data(8 * (22 + 3 * l) + 23 downto 8 * (22 + 3 * l))
+		<= mon_disp(l)(7 downto 0) & mon_disp(l)(15 downto 8) & mon_disp(l)(23 downto 16);
+end generate;
 
 end generate;
 

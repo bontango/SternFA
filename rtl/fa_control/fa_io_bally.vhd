@@ -39,7 +39,7 @@
 --    0..110    Display   -- Bitfolge 1:1 wie boot_message, U10_CA2 = '0'
 --    120       U10_CA2 = '1' -- ab hier ist der CD4502 gesperrt und U10_PA frei
 --    200..799  Lampen    -- 15 Adressen a 40 Takte
---    800..808  Adresse 15 ("keine Lampe") in beide 4514 nachladen
+--    800..804  Adresse 15 ("keine Lampe") in beide 4514 nachladen, Strobes bleiben LOW
 --    900..1399 Schalter  -- 5 Strobes a 100 Takte, U10_PB nach Einschwingen uebernehmen
 --    1499      Zaehler zurueck auf 0
 --
@@ -307,11 +307,11 @@ begin
 					pa_lo <= "1111";
 					pa_hi <= "1111";
 				when T_LAMP_PARK + 4 =>
+					-- Bleiben LOW bis zum naechsten Lampendurchlauf: bei HIGH waere der
+					-- 4514 transparent, und U10_CB2 HIGH strobt ausserdem die DIP-Bank S4
+					-- auf die Schalter-Returns.
 					cb2_r    <= '0';
 					u11ca2_r <= '0';
-				when T_LAMP_PARK + 8 =>
-					cb2_r    <= '1';
-					u11ca2_r <= '1';
 				when others => null;
 			end case;
 
@@ -323,14 +323,16 @@ begin
 				idx  := slot / T_SW_STEP;
 				ofs  := slot - idx * T_SW_STEP;
 				if ofs = 0 then
-					-- Strobe aktiv HIGH und one-hot ueber U10_PA(4:0). Strobe 5 liegt
-					-- auf PA(4) und damit auf Lampendatenbit 0 -- unschaedlich, weil
-					-- seit T_LAMP_PARK die Adresse 15 gelatcht ist.
+					-- Strobe aktiv HIGH und one-hot ueber U10_PA(4:0). U10_PA(7:5) MUESSEN
+					-- LOW sein: sie stroben die DIP-Baenke S1..S3 auf dieselben Returns
+					-- (by35.c pia0b_r), jeder eingeschaltete DIP saehe sonst wie ein
+					-- geschlossener Schalter aus. Als Lampendaten sind diese LOW-Pegel
+					-- unschaedlich, weil seit T_LAMP_PARK die Adresse 15 gelatcht ist.
 					if idx = 4 then
-						pa_hi <= "1111";
+						pa_hi <= "0001";
 						pa_lo <= "0000";
 					else
-						pa_hi <= "1110";
+						pa_hi <= "0000";
 						pa_lo <= (others => '0');
 						pa_lo(idx) <= '1';
 					end if;
